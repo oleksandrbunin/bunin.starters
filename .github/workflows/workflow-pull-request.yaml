@@ -9,5 +9,5 @@ jobs:
   test:
     runs-on: ubuntu-20.04
     steps:
-      - run: return 0
+      - run: exit 0
 
