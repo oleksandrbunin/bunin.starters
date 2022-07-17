@@ -19,8 +19,9 @@ jobs:
         with:
           java-version: '17'
           distribution: 'corretto'
-#      - name: Build with Maven
-#        run: mvn --batch-mode --update-snapshots package
-      - run: echo $(pwd)
+      - run: cd common-web-starter
+      - run: pwd
+      - name: Build with Maven
+        run: mvn --batch-mode --update-snapshots clean package
 
 
