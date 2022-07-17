@@ -9,6 +9,7 @@ on:
       - opened
       - reopened
       - edited
+      - synchronize
     paths:
       - common-web-starter/**
 
