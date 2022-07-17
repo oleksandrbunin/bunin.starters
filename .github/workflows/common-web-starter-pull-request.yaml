@@ -23,10 +23,14 @@ jobs:
         with:
           java-version: '17'
           distribution: 'corretto'
+      - run: echo $HOME
+      - name: Decrypt settings.xml
+        run: gpg --quiet --batch --yes --decrypt --passphrase="$MAVEN_SETTINGS_GPG_AES_256_KEY" \
+        --output $HOME/maven-settings/settings.xml.gpg $HOME/maven-settings/settings.xml
       - name: Build with Maven
         run: |
           cd common-web-starter
           pwd
-          mvn --batch-mode --update-snapshots clean package
+          mvn --batch-mode --update-snapshots -s ../maven-settings/settings.xml clean verify
 
 
