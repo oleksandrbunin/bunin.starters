@@ -1,10 +1,7 @@
 name: Multitenancy Base Starter Workflow
 
 on:
-  pull_request:
-    types:
-      - opened
-      - reopened
+  push:
     paths:
       - multitenancy-spring-boot-starter-base/**
 
@@ -12,5 +9,5 @@ jobs:
   test:
     runs-on: ubuntu-20.04
     steps:
-      - run: echo "$GITHUB_WORKSPACE"
+      - run: return 0
 
