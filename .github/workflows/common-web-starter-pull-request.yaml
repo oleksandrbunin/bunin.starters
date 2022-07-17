@@ -9,6 +9,8 @@ on:
       - synchronize
     paths:
       - common-web-starter/**
+    paths-ignore:
+      - !common-web-starter/**
 
 jobs:
   web-starter-run-integration-test:
