@@ -30,6 +30,6 @@ jobs:
         run: |
           cd common-web-starter
           pwd
-          mvn --batch-mode --update-snapshots -s ../maven-settings/settings.xml clean verify
+          mvn --batch-mode --update-snapshots -s "$GITHUB_WORKSPACE/maven-settings/settings.xml" clean verify
 
 
