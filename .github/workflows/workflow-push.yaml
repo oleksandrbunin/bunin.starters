@@ -3,7 +3,7 @@ name: Multitenancy Base Starter Workflow
 on:
   push:
     paths:
-      - multitenancy-spring-boot-starter-base/**
+      - .github/workflows/**
 
 jobs:
   test:
