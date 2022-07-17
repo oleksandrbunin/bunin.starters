@@ -25,8 +25,7 @@ jobs:
           distribution: 'corretto'
       - run: echo $HOME
       - name: Decrypt settings.xml
-        run: gpg --quiet --batch --yes --decrypt --passphrase="$MAVEN_SETTINGS_GPG_AES_256_KEY" \
-        --output $HOME/maven-settings/settings.xml.gpg $HOME/maven-settings/settings.xml
+        run: gpg --quiet --batch --yes --decrypt --passphrase="$MAVEN_SETTINGS_GPG_AES_256_KEY" --output $HOME/maven-settings/settings.xml.gpg $HOME/maven-settings/settings.xml
       - name: Build with Maven
         run: |
           cd common-web-starter
