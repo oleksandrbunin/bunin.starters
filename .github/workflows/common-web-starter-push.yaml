@@ -1,10 +1,7 @@
 name: Common Web Starter
 
 on:
-  pull_request:
-    types:
-      - opened
-      - reopened
+  push:
     paths:
       - common-web-starter/**
 
