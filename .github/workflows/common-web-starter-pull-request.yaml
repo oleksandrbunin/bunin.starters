@@ -1,9 +1,6 @@
 name: Common Web Starter
 
 on:
-  push:
-    paths:
-      - common-web-starter/**
   pull_request:
     types:
       - opened
@@ -32,6 +29,6 @@ jobs:
         run: |
           cd common-web-starter
           pwd
-          mvn --batch-mode --update-snapshots -s "$GITHUB_WORKSPACE/maven-settings/settings.xml" clean verify
+          mvn --batch-mode -s "$GITHUB_WORKSPACE/maven-settings/settings.xml" clean package
 
 
