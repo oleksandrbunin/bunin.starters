@@ -5,14 +5,12 @@
 		<groupId>org.ob.starters</groupId>
 		<artifactId>parent</artifactId>
 		<version>0.1.0-SNAPSHOT</version>
+		<relativePath>../parent/pom.xml</relativePath>
 	</parent>
 	<artifactId>common-web-starter</artifactId>
-	<version>0.1.0</version>
+	<version>0.1.0-SNAPSHOT</version>
 	<name>common-web-starter</name>
-	<description>common-web Spring Boot starter</description>
-	<properties>
-		<java.version>11</java.version>
-	</properties>
+	<description>common-web spring boot starter</description>
 
 	<build>
 		<plugins>
@@ -35,6 +33,13 @@
         </plugins>
 	</build>
 
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub Oleksandr Bunin Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/oleksandrbunin/bunin.starters</url>
+		</repository>
+	</distributionManagement>
 
   <scm>
     <tag>common-web-starter-0.1.0</tag>
