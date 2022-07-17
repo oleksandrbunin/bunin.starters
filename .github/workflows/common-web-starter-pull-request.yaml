@@ -26,6 +26,8 @@ jobs:
       - run: echo $GITHUB_WORKSPACE
       - name: Decrypt settings.xml
         run: gpg --quiet --batch --yes --decrypt --passphrase="$MAVEN_SETTINGS_GPG_AES_256_KEY" --output "$GITHUB_WORKSPACE/maven-settings/settings.xml" "$GITHUB_WORKSPACE/maven-settings/settings.xml.gpg"
+        env:
+          MAVEN_SETTINGS_GPG_AES_256_KEY: ${{ secrets.MAVEN_SETTINGS_GPG_AES_256_KEY }}
       - name: Build with Maven
         run: |
           cd common-web-starter
