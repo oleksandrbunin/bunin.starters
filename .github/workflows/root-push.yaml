@@ -1,0 +1,12 @@
+name: Multitenancy Base Starter Workflow
+
+on:
+  push:
+    paths:
+      - *
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+      - run: exit 0
