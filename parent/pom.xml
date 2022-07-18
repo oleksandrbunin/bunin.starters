@@ -11,7 +11,7 @@
 
     <groupId>org.ob.starters</groupId>
     <artifactId>parent</artifactId>
-    <version>0.1.4-SNAPSHOT</version>
+    <version>0.1.5-SNAPSHOT</version>
     <name>parent</name>
     <description>Demo project for Spring Boot</description>
     <packaging>pom</packaging>
