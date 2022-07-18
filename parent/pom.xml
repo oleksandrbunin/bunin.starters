@@ -11,7 +11,7 @@
 
     <groupId>org.ob.starters</groupId>
     <artifactId>parent</artifactId>
-    <version>0.1.5-SNAPSHOT</version>
+    <version>0.1.6-SNAPSHOT</version>
     <name>parent</name>
     <description>Demo project for Spring Boot</description>
     <packaging>pom</packaging>
@@ -203,9 +203,7 @@
                         <excludedGroups>unit</excludedGroups>
                         <classesDirectory>${project.build.outputDirectory}</classesDirectory>
                         <includes>
-                            <include>integration/**IT.java</include>
-                            <include>integration/**Test*.java</include>
-                            <include>integration/**Test.java</include>
+                            <include>integration/**</include>
                         </includes>
                     </configuration>
                     <executions>
