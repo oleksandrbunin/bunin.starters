@@ -1,12 +1,13 @@
-name: Workflow Push
+name: Parent
 
 on:
   push:
     paths:
-      - .github/workflows/**
+      - parent/**
 
 jobs:
   test:
     runs-on: ubuntu-20.04
     steps:
       - run: exit 0
+
