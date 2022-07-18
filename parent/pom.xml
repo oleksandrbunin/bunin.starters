@@ -26,7 +26,7 @@
         <bcprov-jdk15on.version>1.70</bcprov-jdk15on.version>
         <slf4j-api.version>1.7.36</slf4j-api.version>
         <hibernate-validator.version>7.0.4.Final</hibernate-validator.version>
-        <skip-docker-db>true</skip-docker-db>
+        <skip-docker-db>false</skip-docker-db>
         <project.scm.id>github-ob</project.scm.id>
     </properties>
 
