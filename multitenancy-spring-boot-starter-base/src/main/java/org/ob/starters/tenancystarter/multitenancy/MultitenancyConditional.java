@@ -10,7 +10,7 @@ import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Objects;
 
-import static org.apache.commons.lang3.StringUtils.upperCase;
+import static liquibase.repackaged.org.apache.commons.lang3.StringUtils.upperCase;
 import static org.ob.starters.tenancystarter.multitenancy.StarterConfigurationProperties.MULTITENANCY_PROPERTY;
 
 public abstract class MultitenancyConditional implements Condition {
