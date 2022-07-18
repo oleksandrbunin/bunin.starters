@@ -1,0 +1,19 @@
+
+property:
+  source:
+    value: TestPropertySource
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres?ssl=false&sslfactory=org.postgresql.ssl.NonValidatingFactory
+    driverClassName: org.postgresql.Driver
+    username: postgres
+    password: postgres
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+  jackson:
+    default-property-inclusion: non_null

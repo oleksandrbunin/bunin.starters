@@ -1,0 +1,16 @@
+ob-multitenancy-starter:
+  enabled: true
+  multitenancy: SCHEMA_PER_TENANT
+  defaultSchema: public
+  runLiquibaseForTenants: true
+  cache:
+    maxSize: 20
+    expiration: 30
+    timeUnit: MINUTES
+  defaultScan:
+    entityPackages:
+      - org.wpstarters.multitenancyspringbootstarter.multitenancy.domain
+  default-liquibase:
+    database-change-log-table: "**/default_schema-changelog.xml"
+  multitenancy-liquibase:
+    database-change-log-table: "**/tenants-changelog.xml"
