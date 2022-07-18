@@ -3,6 +3,7 @@ property:
   source:
     value: TestPropertySource
 
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/postgres?ssl=false&sslfactory=org.postgresql.ssl.NonValidatingFactory
@@ -17,3 +18,5 @@ spring:
       ddl-auto: validate
   jackson:
     default-property-inclusion: non_null
+  liquibase:
+    enabled: false

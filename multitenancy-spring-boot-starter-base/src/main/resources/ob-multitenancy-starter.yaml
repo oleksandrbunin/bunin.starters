@@ -14,3 +14,5 @@ ob-multitenancy-starter:
     database-change-log-table: "**/default_schema-changelog.xml"
   multitenancy-liquibase:
     database-change-log-table: "**/tenants-changelog.xml"
+
+
