@@ -1,12 +1,15 @@
 name: Common Web Starter
 
+path-ant-matcher: &path-ant-matcher "common-web-starter/**"
+path-matcher: &path-matcher "common-web-starter/"
+
 on:
   pull_request:
     types:
       - opened
       - reopened
     paths:
-      - common-web-starter/**
+      - *path-ant-matcher
 
 jobs:
   test:
@@ -25,8 +28,9 @@ jobs:
           MAVEN_SETTINGS_GPG_AES_256_KEY: ${{ secrets.MAVEN_SETTINGS_GPG_AES_256_KEY }}
       - name: Build with Maven
         run: |
-          cd common-web-starter
+          cd ${PATH}
           pwd
           ./mvnw --batch-mode --update-snapshots -s "$GITHUB_WORKSPACE/maven-settings/settings.xml" clean verify
-
+        env:
+          PATH: *path-matcher
 
