@@ -1,4 +1,4 @@
-name: Multitenancy Base Starter Workflow
+name: Workflow Push
 
 on:
   push:
