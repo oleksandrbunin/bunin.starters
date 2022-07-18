@@ -1,4 +1,4 @@
-package integration.org.ob.starters.tenancystarter.models;
+package org.ob.starters.tenancystarter.models;
 
 import org.ob.starters.commonwebstarter.Tenant;
 

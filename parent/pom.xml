@@ -11,7 +11,7 @@
 
     <groupId>org.ob.starters</groupId>
     <artifactId>parent</artifactId>
-    <version>0.1.7-SNAPSHOT</version>
+    <version>0.1.8-SNAPSHOT</version>
     <name>parent</name>
     <description>Demo project for Spring Boot</description>
     <packaging>pom</packaging>
@@ -157,6 +157,8 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.0.0-M7</version>
                     <configuration>
+                        <groups>unit</groups>
+                        <excludedGroups>integration</excludedGroups>
                         <useSystemClassLoader>false</useSystemClassLoader>
                         <parallel>methods</parallel>
                         <threadCount>1</threadCount>
@@ -200,9 +202,9 @@
                         <excludedGroups>unit</excludedGroups>
                         <classesDirectory>${project.build.outputDirectory}</classesDirectory>
                         <includes>
-                            <include>integration/**IT.java</include>
-                            <include>integration/**Test*.java</include>
-                            <include>integration/**Test.java</include>
+                            <include>**/*IT.java</include>
+                            <include>**/Test*.java</include>
+                            <include>**/*Test.java</include>
                         </includes>
                     </configuration>
                     <executions>

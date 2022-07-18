@@ -1,4 +1,4 @@
-package integration.org.ob.starters.tenancystarter.configuration;
+package org.ob.starters.tenancystarter.configuration;
 
 import org.ob.starters.tenancystarter.migrations.IMigrationPathProvider;
 import org.ob.starters.tenancystarter.migrations.MigrationPathsProvider;

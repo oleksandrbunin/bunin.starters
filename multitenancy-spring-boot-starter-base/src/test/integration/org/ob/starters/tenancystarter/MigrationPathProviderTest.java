@@ -1,10 +1,9 @@
-package integration.org.ob.starters.tenancystarter;
+package org.ob.starters.tenancystarter;
 
-import integration.org.ob.starters.tenancystarter.configuration.EmptyConfiguration;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import integration.org.ob.starters.tenancystarter.configuration.MigrationPathProviderTestConfiguration;
-import org.ob.starters.tenancystarter.MultitenancyStarterConfiguration;
-import org.ob.starters.tenancystarter.YamlEnvironmentBeanProcessor;
+import org.ob.starters.tenancystarter.configuration.EmptyConfiguration;
+import org.ob.starters.tenancystarter.configuration.MigrationPathProviderTestConfiguration;
 import org.ob.starters.tenancystarter.migrations.IMigrationPathProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         YamlEnvironmentBeanProcessor.class,
         MigrationPathProviderTestConfiguration.class
 })
+@Tag("integration")
 class MigrationPathProviderTest extends BaseTest {
 
     @Autowired

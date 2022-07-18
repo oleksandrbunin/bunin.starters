@@ -1,11 +1,13 @@
-package integration.org.ob.starters.tenancystarter;
+package org.ob.starters.tenancystarter;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("integration")
 class ContextTest extends BaseTest {
 
     @Autowired

@@ -1,9 +1,7 @@
-package integration.org.ob.starters.tenancystarter;
+package org.ob.starters.tenancystarter;
 
-import integration.org.ob.starters.tenancystarter.configuration.EmptyConfiguration;
 import org.junit.jupiter.api.Tag;
-import org.ob.starters.tenancystarter.MultitenancyStarterConfiguration;
-import org.ob.starters.tenancystarter.YamlEnvironmentBeanProcessor;
+import org.ob.starters.tenancystarter.configuration.EmptyConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -16,10 +14,10 @@ import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
         YamlEnvironmentBeanProcessor.class
 })
 @SpringJUnitWebConfig
-@Tag("integration")
 @AutoConfigureMockMvc
 @ActiveProfiles({"test"})
 @TestPropertySource(locations = "classpath:/application-test.yaml")
+@Tag("integration")
 abstract class BaseTest {
 
 

@@ -1,4 +1,4 @@
-package integration.org.ob.starters.tenancystarter.configuration;
+package org.ob.starters.tenancystarter.configuration;
 
 import org.springframework.context.annotation.Configuration;
 

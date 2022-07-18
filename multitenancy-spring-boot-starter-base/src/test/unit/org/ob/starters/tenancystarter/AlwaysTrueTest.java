@@ -1,10 +1,12 @@
-package unit;
+package org.ob.starters.tenancystarter;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AlwaysTrueTest {
+@Tag("unit")
+class AlwaysTrueTest {
 
     @Test
     void alwaysTrue() {

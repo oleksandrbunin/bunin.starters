@@ -1,18 +1,17 @@
-package integration.org.ob.starters.tenancystarter;
+package org.ob.starters.tenancystarter;
 
-import integration.org.ob.starters.tenancystarter.configuration.EmptyConfiguration;
-import integration.org.ob.starters.tenancystarter.configuration.MigrationServiceTestConfiguration;
-import integration.org.ob.starters.tenancystarter.configuration.SpringBootStarterTestConfiguration;
-import integration.org.ob.starters.tenancystarter.models.DummyTenant;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
-import org.ob.starters.tenancystarter.MultitenancyStarterConfiguration;
-import org.ob.starters.tenancystarter.YamlEnvironmentBeanProcessor;
+import org.ob.starters.tenancystarter.configuration.EmptyConfiguration;
+import org.ob.starters.tenancystarter.configuration.MigrationServiceTestConfiguration;
+import org.ob.starters.tenancystarter.configuration.SpringBootStarterTestConfiguration;
 import org.ob.starters.tenancystarter.migrations.ISchemaManipulator;
 import org.ob.starters.tenancystarter.migrations.ISchemaMigrationsService;
+import org.ob.starters.tenancystarter.models.DummyTenant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -30,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         SpringBootStarterTestConfiguration.class,
         MigrationServiceTestConfiguration.class
 })
+@Tag("integration")
 class MigrationServiceTest extends BaseTest {
 
     private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
