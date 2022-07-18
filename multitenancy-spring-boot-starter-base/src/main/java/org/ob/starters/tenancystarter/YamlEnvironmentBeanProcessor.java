@@ -1,6 +1,6 @@
-package integration.org.ob.starters.tenancystarter;
+package org.ob.starters.tenancystarter;
 
-import integration.org.ob.starters.tenancystarter.exceptions.IOYamlException;
+import org.ob.starters.tenancystarter.exceptions.IOYamlException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.boot.env.YamlPropertySourceLoader;

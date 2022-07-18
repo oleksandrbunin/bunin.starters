@@ -1,9 +1,9 @@
 package integration.org.ob.starters.tenancystarter.models;
 
-import integration.org.ob.starters.tenancystarter.migrations.BaseSchemaMigrationsService;
-import integration.org.ob.starters.tenancystarter.migrations.IMigrationPathProvider;
-import integration.org.ob.starters.tenancystarter.migrations.ISchemaManipulator;
 import org.ob.starters.commonwebstarter.Tenant;
+import org.ob.starters.tenancystarter.migrations.BaseSchemaMigrationsService;
+import org.ob.starters.tenancystarter.migrations.IMigrationPathProvider;
+import org.ob.starters.tenancystarter.migrations.ISchemaManipulator;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 
 import javax.sql.DataSource;

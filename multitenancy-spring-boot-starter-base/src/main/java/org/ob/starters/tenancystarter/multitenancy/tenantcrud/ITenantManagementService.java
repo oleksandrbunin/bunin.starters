@@ -1,4 +1,4 @@
-package integration.org.ob.starters.tenancystarter.multitenancy.tenantcrud;
+package org.ob.starters.tenancystarter.multitenancy.tenantcrud;
 
 import org.ob.starters.commonwebstarter.Tenant;
 

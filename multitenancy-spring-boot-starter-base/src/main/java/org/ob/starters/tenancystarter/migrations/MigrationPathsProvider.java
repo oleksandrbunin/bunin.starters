@@ -1,4 +1,4 @@
-package integration.org.ob.starters.tenancystarter.migrations;
+package org.ob.starters.tenancystarter.migrations;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

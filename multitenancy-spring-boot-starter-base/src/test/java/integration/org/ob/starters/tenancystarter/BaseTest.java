@@ -2,6 +2,8 @@ package integration.org.ob.starters.tenancystarter;
 
 import integration.org.ob.starters.tenancystarter.configuration.EmptyConfiguration;
 import org.junit.jupiter.api.Tag;
+import org.ob.starters.tenancystarter.MultitenancyStarterConfiguration;
+import org.ob.starters.tenancystarter.YamlEnvironmentBeanProcessor;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;

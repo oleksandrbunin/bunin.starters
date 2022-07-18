@@ -1,4 +1,4 @@
-package integration.org.ob.starters.tenancystarter.multitenancy;
+package org.ob.starters.tenancystarter.multitenancy;
 
 public class SharedSchema extends MultitenancyConditional {
 

@@ -3,7 +3,9 @@ package integration.org.ob.starters.tenancystarter;
 import integration.org.ob.starters.tenancystarter.configuration.EmptyConfiguration;
 import org.junit.jupiter.api.Test;
 import integration.org.ob.starters.tenancystarter.configuration.MigrationPathProviderTestConfiguration;
-import integration.org.ob.starters.tenancystarter.migrations.IMigrationPathProvider;
+import org.ob.starters.tenancystarter.MultitenancyStarterConfiguration;
+import org.ob.starters.tenancystarter.YamlEnvironmentBeanProcessor;
+import org.ob.starters.tenancystarter.migrations.IMigrationPathProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 

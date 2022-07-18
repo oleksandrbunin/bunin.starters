@@ -1,4 +1,4 @@
-package integration.org.ob.starters.tenancystarter.multitenancy;
+package org.ob.starters.tenancystarter.multitenancy;
 
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
@@ -18,17 +18,16 @@ public class TenancyStarterLiquibase extends SpringLiquibase {
 
     @Override
     protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
-        Liquibase liquibase = new Liquibase(getChangeLog(), resourceAccessor, createDatabase(c, resourceAccessor));
-        if (parameters != null) {
-            for (Map.Entry<String, String> entry : parameters.entrySet()) {
-                liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
+        try (Liquibase liquibase = new Liquibase(getChangeLog(), resourceAccessor, createDatabase(c, resourceAccessor))) {
+            if (parameters != null) {
+                for (Map.Entry<String, String> entry : parameters.entrySet()) {
+                    liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
+                }
             }
+            if (isDropFirst()) {
+                liquibase.dropAll();
+            }
+            return liquibase;
         }
-
-        if (isDropFirst()) {
-            liquibase.dropAll();
-        }
-
-        return liquibase;
     }
 }

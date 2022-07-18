@@ -1,4 +1,4 @@
-package integration.org.ob.starters.tenancystarter.migrations;
+package org.ob.starters.tenancystarter.migrations;
 
 import liquibase.exception.LiquibaseException;
 import liquibase.integration.spring.SpringLiquibase;
@@ -18,7 +18,7 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.util.List;
 
-import static integration.org.ob.starters.tenancystarter.multitenancy.SpringLiquibaseBuilder.buildDefault;
+import static org.ob.starters.tenancystarter.multitenancy.SpringLiquibaseBuilder.buildDefault;
 
 public abstract class BaseSchemaMigrationsService<T extends Tenant> implements ISchemaMigrationsService<T>, ResourceLoaderAware {
 

@@ -1,4 +1,4 @@
-package integration.org.ob.starters.tenancystarter.migrations;
+package org.ob.starters.tenancystarter.migrations;
 
 import org.ob.starters.commonwebstarter.Tenant;
 

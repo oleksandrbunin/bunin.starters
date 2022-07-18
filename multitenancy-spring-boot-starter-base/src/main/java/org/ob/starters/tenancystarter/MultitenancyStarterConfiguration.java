@@ -1,7 +1,7 @@
-package integration.org.ob.starters.tenancystarter;
+package org.ob.starters.tenancystarter;
 
-import integration.org.ob.starters.tenancystarter.multitenancy.CustomLiquibaseProperties;
-import integration.org.ob.starters.tenancystarter.multitenancy.StarterConfigurationProperties;
+import org.ob.starters.tenancystarter.multitenancy.CustomLiquibaseProperties;
+import org.ob.starters.tenancystarter.multitenancy.StarterConfigurationProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;

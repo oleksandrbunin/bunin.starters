@@ -1,11 +1,11 @@
 package integration.org.ob.starters.tenancystarter.configuration;
 
-import integration.org.ob.starters.tenancystarter.migrations.ISchemaManipulator;
-import integration.org.ob.starters.tenancystarter.migrations.ISchemaMigrationsService;
-import integration.org.ob.starters.tenancystarter.migrations.MigrationPathsProvider;
-import integration.org.ob.starters.tenancystarter.migrations.IMigrationPathProvider;
 import integration.org.ob.starters.tenancystarter.models.DummyTenant;
 import integration.org.ob.starters.tenancystarter.models.MigrationServiceSchema;
+import org.ob.starters.tenancystarter.migrations.IMigrationPathProvider;
+import org.ob.starters.tenancystarter.migrations.ISchemaManipulator;
+import org.ob.starters.tenancystarter.migrations.ISchemaMigrationsService;
+import org.ob.starters.tenancystarter.migrations.MigrationPathsProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;

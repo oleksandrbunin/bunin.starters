@@ -1,4 +1,4 @@
-package integration.org.ob.starters.tenancystarter.multitenancy;
+package org.ob.starters.tenancystarter.multitenancy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static liquibase.repackaged.org.apache.commons.lang3.StringUtils.upperCase;
-import static integration.org.ob.starters.tenancystarter.multitenancy.StarterConfigurationProperties.MULTITENANCY_PROPERTY;
+import static org.ob.starters.tenancystarter.multitenancy.StarterConfigurationProperties.MULTITENANCY_PROPERTY;
 
 public abstract class MultitenancyConditional implements Condition {
 

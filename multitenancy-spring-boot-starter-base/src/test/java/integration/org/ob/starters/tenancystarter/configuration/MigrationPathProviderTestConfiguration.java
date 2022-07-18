@@ -1,7 +1,7 @@
 package integration.org.ob.starters.tenancystarter.configuration;
 
-import integration.org.ob.starters.tenancystarter.migrations.IMigrationPathProvider;
-import integration.org.ob.starters.tenancystarter.migrations.MigrationPathsProvider;
+import org.ob.starters.tenancystarter.migrations.IMigrationPathProvider;
+import org.ob.starters.tenancystarter.migrations.MigrationPathsProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
