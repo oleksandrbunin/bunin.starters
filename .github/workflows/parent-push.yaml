@@ -1,0 +1,13 @@
+name: Parent
+
+on:
+  push:
+    paths:
+      - parent/**
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+      - run: exit 0
+

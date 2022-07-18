@@ -1,0 +1,16 @@
+name: Parent
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+    paths:
+      - parent/**
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+      - run: exit 0
+
