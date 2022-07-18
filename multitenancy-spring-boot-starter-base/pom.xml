@@ -14,6 +14,22 @@
 	<description>Demo project for Spring Boot</description>
 
 	<dependencies>
+
+		<!-- [CVE-2016-1000027] CWE-502: Deserialization of Untrusted Data -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>5.3.22</version>
+		</dependency>
+
+		<!-- [CVE-2022-22965] CWE-94: Improper Control of Generation of Code ('Code Injection') -->
+		<!-- [sonatype-2022-1764] CWE-470: Use of Externally-Controlled Input to Select Classes or Code ('Unsafe Reflection') -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<version>5.3.22</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
@@ -23,6 +39,20 @@
 			<groupId>org.ob.starters</groupId>
 			<artifactId>common-web-starter</artifactId>
 			<version>0.1.2-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-web</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-beans</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-web</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
