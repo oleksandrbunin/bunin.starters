@@ -11,7 +11,7 @@
 
     <groupId>org.ob.starters</groupId>
     <artifactId>parent</artifactId>
-    <version>0.1.8-SNAPSHOT</version>
+    <version>0.1.9-SNAPSHOT</version>
     <name>parent</name>
     <description>Demo project for Spring Boot</description>
     <packaging>pom</packaging>
@@ -361,7 +361,7 @@
         </pluginManagement>
     </build>
 
-    <profiles>
+    <!--<profiles>
         <profile>
             <id>unit</id>
             <properties>
@@ -436,7 +436,7 @@
                 </plugins>
             </build>
         </profile>
-    </profiles>
+    </profiles>-->
 
     <distributionManagement>
         <repository>
