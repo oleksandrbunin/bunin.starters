@@ -2,6 +2,8 @@ package org.ob.starters.tenancystarter.models;
 
 import org.ob.starters.commonwebstarter.Tenant;
 
+import java.util.StringJoiner;
+
 public class DummyTenant implements Tenant {
 
     private String id;
@@ -18,5 +20,12 @@ public class DummyTenant implements Tenant {
     @Override
     public boolean isActive() {
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", DummyTenant.class.getSimpleName() + "[", "]")
+                .add("id='" + id + "'")
+                .toString();
     }
 }

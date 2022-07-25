@@ -47,14 +47,14 @@ class MigrationServiceTest extends BaseTest {
 
     @BeforeEach
     void init() {
-        jdbcTemplate.execute("DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres; GRANT ALL ON SCHEMA public TO public;");
+        jdbcTemplate.execute("DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres;");
         List.of(DUMMY_SCHEMA_NAME_1, DUMMY_SCHEMA_NAME_2).forEach(schemaManipulator::createSchema);
     }
 
     @AfterEach
     void clean() {
         List.of(DUMMY_SCHEMA_NAME_1, DUMMY_SCHEMA_NAME_2).forEach(schemaManipulator::deleteSchema);
-        jdbcTemplate.execute("DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres; GRANT ALL ON SCHEMA public TO public;");
+        jdbcTemplate.execute("DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres;");
     }
 
     @Test
@@ -63,19 +63,15 @@ class MigrationServiceTest extends BaseTest {
     }
 
     @Test
-    void schemaMigrationsTest() {
+    void schemaMigrationsTest() throws Exception {
         DummyTenant dummyTenant1 = new DummyTenant(DUMMY_SCHEMA_NAME_1);
         DummyTenant dummyTenant2 = new DummyTenant(DUMMY_SCHEMA_NAME_2);
 
-        try {
-            ISchemaMigrationsService<DummyTenant> dummyTenantISchemaMigrationsService = migrationServiceSchema;
-            for (DummyTenant dummyTenant : List.of(dummyTenant1, dummyTenant2)) {
-                dummyTenantISchemaMigrationsService.runMigrationsOnTenant(dummyTenant);
-            }
-            dummyTenantISchemaMigrationsService.runMigrationsOnDefaultTenant();
-        } catch (Exception exception) {
-            logger.error(exception, () -> "Exception occurred");
+        ISchemaMigrationsService<DummyTenant> dummyTenantISchemaMigrationsService = migrationServiceSchema;
+        for (DummyTenant dummyTenant : List.of(dummyTenant1, dummyTenant2)) {
+            dummyTenantISchemaMigrationsService.runMigrationsOnTenant(dummyTenant);
         }
+        dummyTenantISchemaMigrationsService.runMigrationsOnDefaultTenant();
 
         List.of(DUMMY_SCHEMA_NAME_1, DUMMY_SCHEMA_NAME_2, "public").forEach(schema -> assertThat(
                 jdbcTemplate.query("SELECT COUNT(t) FROM \"%s\".test t".formatted(schema),

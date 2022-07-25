@@ -1,4 +1,7 @@
 
+tenancy-starter-default-schema: public
+application-name: tenancy-starter
+
 property:
   source:
     value: TestPropertySource
@@ -7,9 +10,24 @@ property:
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/postgres?ssl=false&sslfactory=org.postgresql.ssl.NonValidatingFactory
-    driverClassName: org.postgresql.Driver
-    username: postgres
-    password: postgres
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 10000
+      max-lifetime: 240000 #because we have methods which runs more that 30 sec let's set it to 4 min
+      connection-timeout: 10000
+      validation-timeout: 500
+      connection-init-sql: SELECT 1
+      initializationFailTimeout: 250
+      leak-detection-threshold: 200000 #to be sure we only take care of really leaks. And this parameter should be less than max lifetime
+      username: postgres
+      password: postgres
+      driver-class-name: org.postgresql.Driver
+      connection-test-query: SELECT 1
+      data-source-properties:
+        ssl: false
+        sslfactory: org.postgresql.ssl.NonValidatingFactory
+        socketTimeout: 3000
   jpa:
     properties:
       hibernate:
@@ -20,3 +38,4 @@ spring:
     default-property-inclusion: non_null
   liquibase:
     enabled: false
+

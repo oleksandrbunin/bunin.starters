@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
-
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.net.URI;

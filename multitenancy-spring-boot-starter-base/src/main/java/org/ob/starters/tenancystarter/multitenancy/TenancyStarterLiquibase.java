@@ -18,16 +18,15 @@ public class TenancyStarterLiquibase extends SpringLiquibase {
 
     @Override
     protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
-        try (Liquibase liquibase = new Liquibase(getChangeLog(), resourceAccessor, createDatabase(c, resourceAccessor))) {
-            if (parameters != null) {
-                for (Map.Entry<String, String> entry : parameters.entrySet()) {
-                    liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
-                }
+        Liquibase liquibase = new Liquibase(getChangeLog(), resourceAccessor, createDatabase(c, resourceAccessor));
+        if (parameters != null) {
+            for (Map.Entry<String, String> entry : parameters.entrySet()) {
+                liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
             }
-            if (isDropFirst()) {
-                liquibase.dropAll();
-            }
-            return liquibase;
         }
+        if (isDropFirst()) {
+            liquibase.dropAll();
+        }
+        return liquibase;
     }
 }
