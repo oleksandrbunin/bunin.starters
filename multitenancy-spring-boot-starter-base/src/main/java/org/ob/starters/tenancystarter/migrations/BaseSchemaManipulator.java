@@ -61,10 +61,10 @@ public class BaseSchemaManipulator implements ISchemaManipulator {
     public void deleteSchema(String schema, boolean cascade, boolean ifExists) {
         String sql = "DROP SCHEMA IF EXISTS \"%s\" CASCADE";
         if (!cascade) {
-            sql = sql.replaceAll("CASCADE", "");
+            sql = sql.replace("CASCADE", "");
         }
         if (!ifExists) {
-            sql = sql.replaceAll("IF EXISTS", "");
+            sql = sql.replace("IF EXISTS", "");
         }
         jdbcTemplate.execute(sql.formatted(schema));
     }
