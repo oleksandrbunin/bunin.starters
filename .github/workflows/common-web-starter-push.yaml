@@ -1,12 +1,9 @@
 name: Common Web Starter
 
-path-ant-matcher: &path-ant-matcher "common-web-starter/**"
-path-matcher: &path-matcher "common-web-starter/"
-
 on:
   push:
     paths:
-      - *path-ant-matcher
+      - common-web-starter/**
 
 jobs:
   test:
@@ -29,5 +26,5 @@ jobs:
           pwd
           ./mvnw --batch-mode --update-snapshots -s "$GITHUB_WORKSPACE/maven-settings/settings.xml" clean verify
         env:
-          PATH: *path-matcher
+          PATH: common-web-starter/
 

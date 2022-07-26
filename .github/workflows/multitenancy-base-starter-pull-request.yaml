@@ -1,12 +1,9 @@
 name: Multitenancy Base Starter Workflow
 
-path-ant-matcher: &path-ant-matcher "multitenancy-spring-boot-starter-base/**"
-path-matcher: &path-matcher "multitenancy-spring-boot-starter-base/"
-
 on:
   pull_request:
     paths:
-      - *path-ant-matcher
+      - multitenancy-spring-boot-starter-base/**
 
 jobs:
   test:
@@ -30,6 +27,6 @@ jobs:
           ./mvnw --batch-mode --update-snapshots -s "$GITHUB_WORKSPACE/maven-settings/settings.xml" -P unit clean verify
           ./mvnw --batch-mode --update-snapshots -s "$GITHUB_WORKSPACE/maven-settings/settings.xml" -P integration clean verify
         env:
-          PATH: *path-matcher
+          PATH: multitenancy-spring-boot-starter-base/
 
 
