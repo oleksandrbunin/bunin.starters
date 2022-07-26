@@ -119,137 +119,136 @@ public class BaseSchemaManipulator implements ISchemaManipulator {
     public static Lock makeSchemaLock(String schema, Connection connection) {
         return new SchemaLock(connection, schema);
     }
+}
 
+/**
+ * Schema lock implementation
+ * Throws LockTimeoutException
+ */
+class SchemaLock implements Lock, AutoCloseable  {
 
-    /**
-     * Schema lock implementation
-     * Throws LockTimeoutException
-     */
-    private static class SchemaLock implements Lock, AutoCloseable  {
+    private static final long defaultLockTimeout = 60;
+    private static final TimeUnit defaultLockTimeUnit = TimeUnit.SECONDS;
 
-        private static final long defaultLockTimeout = 60;
-        private static final TimeUnit defaultLockTimeUnit = TimeUnit.SECONDS;
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-        private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final String LOCK_TIMEOUT_QUERY = "SET LOCAL lock_timeout TO ";
+    private static final String LOCK_SCHEMA_QUERY = "SELECT pg_advisory_lock(?);";
+    private static final String UNLOCK_SCHEMA_QUERY = "SELECT pg_advisory_unlock(?);";
 
-        private static final String LOCK_TIMEOUT_QUERY = "SET LOCAL lock_timeout TO ";
-        private static final String LOCK_SCHEMA_QUERY = "SELECT pg_advisory_lock(?);";
-        private static final String UNLOCK_SCHEMA_QUERY = "SELECT pg_advisory_unlock(?);";
+    private final Connection connection;
+    private final String schema;
+    private final int maxAttempts;
 
-        private final Connection connection;
-        private final String schema;
-        private final int maxAttempts;
+    public SchemaLock(Connection connection, String schema, int maxAttempts) {
+        this.connection = connection;
+        this.schema = schema;
+        this.maxAttempts = maxAttempts;
+    }
 
-        public SchemaLock(Connection connection, String schema, int maxAttempts) {
-            this.connection = connection;
-            this.schema = schema;
-            this.maxAttempts = maxAttempts;
-        }
+    public SchemaLock(Connection connection, String schema) {
+        this.connection = connection;
+        this.schema = schema;
+        this.maxAttempts = 1;
+    }
 
-        public SchemaLock(Connection connection, String schema) {
-            this.connection = connection;
-            this.schema = schema;
-            this.maxAttempts = 1;
-        }
-
-        @Override
-        public void lock()  {
-            int attempt = 0;
-            while (attempt < maxAttempts) {
-                logger.info("TRYING TO LOCK SCHEMA {} - {} ATTEMPT",
-                        schema, attempt
-                );
-                try {
-                    if (tryLock()) {
-                        return;
-                    }
-                } catch (LockTimeoutException e) {
-                    // do nothing
-                    // continue make attempts
-                }
-                attempt++;
-            }
-            throw new LockTimeoutException("COULD NOT ACQUIRE LOCK FOR THE SCHEMA " + schema);
-        }
-
-        @Override
-        public void lockInterruptibly() {
-            throw new NotYetImplementedException();
-        }
-
-        @Override
-        public boolean tryLock() {
-            return tryLock(defaultLockTimeout, defaultLockTimeUnit);
-        }
-
-        @Override
-        public boolean tryLock(long time, TimeUnit unit) {
-            long schemaLockTimeoutMs = unit.toMillis(time);
+    @Override
+    public void lock()  {
+        int attempt = 0;
+        while (attempt < maxAttempts) {
+            logger.info("TRYING TO LOCK SCHEMA {} - {} ATTEMPT",
+                    schema, attempt
+            );
             try {
-                boolean previousAutoCommit = connection.getAutoCommit();
-                connection.setAutoCommit(false);
-                logger.info(
-                        "TRYING TO LOCK SCHEMA {} FOR {} MS",
-                        schema,
-                        schemaLockTimeoutMs
-                );
-                try (Statement timeoutStatement = connection.createStatement()) {
-                    String setLockTimeoutSql = "/* schema: " + schema + " */ " + LOCK_TIMEOUT_QUERY + schemaLockTimeoutMs + ";";
-                    timeoutStatement.execute(setLockTimeoutSql);
-                    logger.info("LOCK {} WAS SET", setLockTimeoutSql);
+                if (tryLock()) {
+                    return;
                 }
-                String lockSchemaQuery = "/* schema: " + schema + " */ " + LOCK_SCHEMA_QUERY;
-                try (PreparedStatement lockStatement = connection.prepareStatement(lockSchemaQuery)) {
-                    lockStatement.setInt(1, calculateLockForSchema(schema));
-                    lockStatement.execute();
-                    logger.info("{} LOCK WAS ACQUIRED.", lockSchemaQuery);
-                }
-                connection.commit();
-                connection.setAutoCommit(previousAutoCommit);
-                return true;
-            } catch (SQLException e) {
-                try {
-                    logger.error("COULD NOT LOCK SCHEMA {} ", schema, e);
-                    connection.rollback();
-                } finally {
-                    throw new LockTimeoutException("COULD NOT LOCK SCHEMA " + schema, e);
-                }
+            } catch (LockTimeoutException e) {
+                // do nothing
+                // continue make attempts
+            }
+            attempt++;
+        }
+        throw new LockTimeoutException("COULD NOT ACQUIRE LOCK FOR THE SCHEMA " + schema);
+    }
+
+    @Override
+    public void lockInterruptibly() {
+        throw new NotYetImplementedException();
+    }
+
+    @Override
+    public boolean tryLock() {
+        return tryLock(defaultLockTimeout, defaultLockTimeUnit);
+    }
+
+    @Override
+    public boolean tryLock(long time, TimeUnit unit) {
+        long schemaLockTimeoutMs = unit.toMillis(time);
+        try {
+            boolean previousAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+            logger.info(
+                    "TRYING TO LOCK SCHEMA {} FOR {} MS",
+                    schema,
+                    schemaLockTimeoutMs
+            );
+            try (Statement timeoutStatement = connection.createStatement()) {
+                String setLockTimeoutSql = "/* schema: " + schema + " */ " + LOCK_TIMEOUT_QUERY + schemaLockTimeoutMs + ";";
+                timeoutStatement.execute(setLockTimeoutSql);
+                logger.info("LOCK {} WAS SET", setLockTimeoutSql);
+            }
+            String lockSchemaQuery = "/* schema: " + schema + " */ " + LOCK_SCHEMA_QUERY;
+            try (PreparedStatement lockStatement = connection.prepareStatement(lockSchemaQuery)) {
+                lockStatement.setInt(1, calculateLockForSchema(schema));
+                lockStatement.execute();
+                logger.info("{} LOCK WAS ACQUIRED.", lockSchemaQuery);
+            }
+            connection.commit();
+            connection.setAutoCommit(previousAutoCommit);
+            return true;
+        } catch (SQLException e) {
+            try {
+                logger.error("COULD NOT LOCK SCHEMA {} ", schema, e);
+                connection.rollback();
+            } finally {
+                throw new LockTimeoutException("COULD NOT LOCK SCHEMA " + schema, e);
             }
         }
+    }
 
-        @Override
-        public void unlock() {
-            try {
-                logger.info("TRYING TO RELEASE {} SCHEMA LOCK", schema);
-                String unlockTenantQuery = "/* schema: " + schema + " */ " + UNLOCK_SCHEMA_QUERY;
-                try (PreparedStatement unlockStatement = connection.prepareStatement(unlockTenantQuery)) {
-                    unlockStatement.setInt(1, calculateLockForSchema(schema));
-                    try (ResultSet unlockResultSet = unlockStatement.executeQuery()) {
-                        unlockResultSet.next();
-                        if (!(Boolean) unlockResultSet.getObject(1)) {
-                            logger.error("COULD NOT RELEASE LOCK FOR SCHEMA " + schema);
-                            throw new LockReleaseException("COULD NOT RELEASE LOCK FOR SCHEMA " + schema);
-                        }
+    @Override
+    public void unlock() {
+        try {
+            logger.info("TRYING TO RELEASE {} SCHEMA LOCK", schema);
+            String unlockTenantQuery = "/* schema: " + schema + " */ " + UNLOCK_SCHEMA_QUERY;
+            try (PreparedStatement unlockStatement = connection.prepareStatement(unlockTenantQuery)) {
+                unlockStatement.setInt(1, calculateLockForSchema(schema));
+                try (ResultSet unlockResultSet = unlockStatement.executeQuery()) {
+                    unlockResultSet.next();
+                    if (!(Boolean) unlockResultSet.getObject(1)) {
+                        logger.error("COULD NOT RELEASE LOCK FOR SCHEMA " + schema);
+                        throw new LockReleaseException("COULD NOT RELEASE LOCK FOR SCHEMA " + schema);
                     }
                 }
-            } catch (SQLException e) {
-                logger.error("COULD NOT RELEASE LOCK FOR SCHEMA " + schema, e);
-                throw new LockReleaseException("COULD NOT RELEASE LOCK FOR SCHEMA " + schema, e);
             }
+        } catch (SQLException e) {
+            logger.error("COULD NOT RELEASE LOCK FOR SCHEMA " + schema, e);
+            throw new LockReleaseException("COULD NOT RELEASE LOCK FOR SCHEMA " + schema, e);
         }
+    }
 
-        @Override
-        public Condition newCondition() {
-            throw new NotYetImplementedException();
-        }
+    @Override
+    public Condition newCondition() {
+        throw new NotYetImplementedException();
+    }
 
-        @Override
-        public void close() {
-            unlock();
-        }
+    @Override
+    public void close() {
+        unlock();
+    }
 
-        private int calculateLockForSchema(String schema) {
-            return schema.hashCode();
-        }
+    private int calculateLockForSchema(String schema) {
+        return schema.hashCode();
     }
 }
