@@ -27,7 +27,8 @@ jobs:
         run: |
           cd ${PATH}
           pwd
-          ./mvnw --batch-mode --update-snapshots -s "$GITHUB_WORKSPACE/maven-settings/settings.xml" clean verify
+          ./mvnw --batch-mode --update-snapshots -s "$GITHUB_WORKSPACE/maven-settings/settings.xml" -P unit clean verify
+          ./mvnw --batch-mode --update-snapshots -s "$GITHUB_WORKSPACE/maven-settings/settings.xml" -P integration clean verify
         env:
           PATH: *path-matcher
 
