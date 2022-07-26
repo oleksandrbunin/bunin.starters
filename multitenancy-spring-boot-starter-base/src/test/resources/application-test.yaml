@@ -1,7 +1,3 @@
-
-tenancy-starter-default-schema: public
-application-name: tenancy-starter
-
 property:
   source:
     value: TestPropertySource
@@ -33,7 +29,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
   jackson:
     default-property-inclusion: non_null
   liquibase:

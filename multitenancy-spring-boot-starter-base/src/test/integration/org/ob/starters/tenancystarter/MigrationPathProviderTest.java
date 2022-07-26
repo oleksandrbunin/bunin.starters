@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = {
         EmptyConfiguration.class,
-        MultitenancyStarterConfiguration.class,
+        TenancyStarterConfiguration.class,
         YamlEnvironmentBeanProcessor.class,
         MigrationPathProviderTestConfiguration.class
 })

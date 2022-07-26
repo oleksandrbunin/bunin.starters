@@ -14,7 +14,7 @@ import java.io.IOException;
 public class YamlEnvironmentBeanProcessor implements EnvironmentPostProcessor {
 
     private static final YamlPropertySourceLoader yamlLoader = new YamlPropertySourceLoader();
-    private static final String PROPERTIES_NAME = "ob-multitenancy-starter";
+    private static final String PROPERTIES_NAME = "ob-tenancy-starter";
     private static final String PROPERTIES_SOURCE = PROPERTIES_NAME + ".yaml";
 
     @Override

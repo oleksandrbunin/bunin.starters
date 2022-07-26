@@ -6,25 +6,25 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-@ConditionalOnProperty(value = "ob-multitenancy-starter.enabled",
+@ConditionalOnProperty(value = "ob-tenancy-starter.enabled",
 		havingValue = "true",
 		matchIfMissing = true)
-public class MultitenancyStarterConfiguration {
+public class TenancyStarterConfiguration {
 
 	@Bean("defaultLiquibaseProperties")
-	@ConfigurationProperties(prefix = "ob-multitenancy-starter.default-liquibase")
+	@ConfigurationProperties(prefix = "ob-tenancy-starter.default-liquibase")
 	public CustomLiquibaseProperties defaultLiquibaseProperties() {
 		return new CustomLiquibaseProperties();
 	}
 
 	@Bean("tenancyLiquibaseProperties")
-	@ConfigurationProperties(prefix = "ob-multitenancy-starter.multitenancy-liquibase")
+	@ConfigurationProperties(prefix = "ob-tenancy-starter.multitenancy-liquibase")
 	public CustomLiquibaseProperties tenancyLiquibaseProperties() {
 		return new CustomLiquibaseProperties();
 	}
 
 	@Bean
-	@ConfigurationProperties(prefix = "ob-multitenancy-starter")
+	@ConfigurationProperties(prefix = "ob-tenancy-starter")
 	public StarterConfigurationProperties starterConfigurationProperties() {
 		return new StarterConfigurationProperties();
 	}

@@ -9,7 +9,7 @@ import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 
 @SpringBootTest(classes = {
         EmptyConfiguration.class,
-        MultitenancyStarterConfiguration.class,
+        TenancyStarterConfiguration.class,
         YamlEnvironmentBeanProcessor.class
 })
 @SpringJUnitWebConfig
