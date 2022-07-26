@@ -2,11 +2,21 @@ name: ALWAYS FAIL
 
 on:
   pull_request:
-    types: [ labeled ]
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
+
 
 jobs:
   test:
-    if: ${{ github.event.label.name == 'DO NOT MERGE' }}
+    name: ALWAYS FAIL
     runs-on: ubuntu-latest
     steps:
-      - run: exit 1
+      - uses: agilepathway/label-checker@v1.0.113
+        with:
+          all_of: "DO NOT MERGE"
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+
