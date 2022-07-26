@@ -22,8 +22,9 @@ jobs:
           MAVEN_SETTINGS_GPG_AES_256_KEY: ${{ secrets.MAVEN_SETTINGS_GPG_AES_256_KEY }}
       - name: Build with Maven
         run: |
-          cd common-web-starter
+          cd ${PATH}
           pwd
           ./mvnw --batch-mode --update-snapshots -s "$GITHUB_WORKSPACE/maven-settings/settings.xml" clean verify
-
+        env:
+          PATH: common-web-starter/
 
