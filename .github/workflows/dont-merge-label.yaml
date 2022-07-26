@@ -19,4 +19,6 @@ jobs:
         with:
           all_of: "DO NOT MERGE"
           repo_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: FAIL
+        run: exit 1
 
