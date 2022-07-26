@@ -1,5 +1,5 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  org.ob.starters.tenancystarter.MultitenancyStarterConfiguration
+  org.ob.starters.tenancystarter.TenancyStarterConfiguration
 
 org.springframework.boot.env.EnvironmentPostProcessor=\
   org.ob.starters.tenancystarter.YamlEnvironmentBeanProcessor
