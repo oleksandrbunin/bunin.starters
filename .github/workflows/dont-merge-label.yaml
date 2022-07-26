@@ -1,4 +1,4 @@
-name: CI
+name: ALWAYS FAIL
 
 on:
   pull_request:
