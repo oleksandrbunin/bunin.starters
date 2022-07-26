@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         MigrationServiceTestConfiguration.class
 })
 @Tag("integration")
-class SchemaManipulatorTest extends BaseTest {
+class BaseSchemaManipulatorTest extends BaseTest {
 
     @Autowired
     ISchemaManipulator schemaManipulator;
