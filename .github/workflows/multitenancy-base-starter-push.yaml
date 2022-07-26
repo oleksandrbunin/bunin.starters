@@ -22,10 +22,10 @@ jobs:
           MAVEN_SETTINGS_GPG_AES_256_KEY: ${{ secrets.MAVEN_SETTINGS_GPG_AES_256_KEY }}
       - name: Build with Maven
         run: |
-          cd ${PATH}
+          cd ${STARTER_PATH}
           pwd
           ./mvnw --batch-mode --update-snapshots -s "$GITHUB_WORKSPACE/maven-settings/settings.xml" -P unit clean verify
           ./mvnw --batch-mode --update-snapshots -s "$GITHUB_WORKSPACE/maven-settings/settings.xml" -P integration clean verify
         env:
-          PATH: multitenancy-spring-boot-starter-base/
+          STARTER_PATH: multitenancy-spring-boot-starter-base/
 
