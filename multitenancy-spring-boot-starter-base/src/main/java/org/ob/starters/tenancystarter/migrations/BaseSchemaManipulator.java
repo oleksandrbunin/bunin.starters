@@ -259,6 +259,6 @@ class SchemaLock implements AutoCloseableLock  {
     }
 
     private int calculateLockForSchema(String schema) {
-        return schema.hashCode();
+        return LockUtils.calculateLockId(schema);
     }
 }
