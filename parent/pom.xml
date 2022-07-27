@@ -11,7 +11,7 @@
 
     <groupId>org.ob.starters</groupId>
     <artifactId>parent</artifactId>
-    <version>0.1.10-SNAPSHOT</version>
+    <version>0.1.11-SNAPSHOT</version>
     <name>parent</name>
     <description>Demo project for Spring Boot</description>
     <packaging>pom</packaging>
@@ -26,6 +26,7 @@
         <bcprov-jdk15on.version>1.70</bcprov-jdk15on.version>
         <slf4j-api.version>1.7.36</slf4j-api.version>
         <hibernate-validator.version>7.0.4.Final</hibernate-validator.version>
+        <vavr.version>0.10.4</vavr.version>
         <skip-docker-db>false</skip-docker-db>
         <project.scm.id>github-ob</project.scm.id>
         <test-source-directory>${project.basedir}/src/test/java</test-source-directory>
@@ -55,7 +56,14 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-configuration-processor</artifactId>
             </dependency>
+
+            <dependency>
+                <groupId>io.vavr</groupId>
+                <artifactId>vavr</artifactId>
+                <version>${vavr.version}</version>
+            </dependency>
         </dependencies>
+
     </dependencyManagement>
 
     <dependencies>
