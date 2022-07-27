@@ -30,13 +30,9 @@ public class BaseSchemaManipulator implements ISchemaManipulator {
     private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final JdbcTemplate jdbcTemplate;
-    private final long schemaLockTimeoutMs;
 
-    public BaseSchemaManipulator(JdbcTemplate jdbcTemplate,
-                                 StarterConfigurationProperties starterConfigurationProperties) {
+    public BaseSchemaManipulator(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        StarterConfigurationProperties.SchemaLockTimeout lockTimeout = starterConfigurationProperties.getSchemaLockTimeout();
-        this.schemaLockTimeoutMs = lockTimeout.getTimeUnit().toMillis(lockTimeout.getTimeout());
     }
 
     @Override

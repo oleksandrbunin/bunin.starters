@@ -29,9 +29,8 @@ public class MigrationServiceTestConfiguration {
     }
 
     @Bean
-    public ISchemaManipulator schemaManipulator(JdbcTemplate jdbcTemplate,
-                                                StarterConfigurationProperties starterConfigurationProperties) {
-        return new BaseSchemaManipulator(jdbcTemplate, starterConfigurationProperties);
+    public ISchemaManipulator schemaManipulator(JdbcTemplate jdbcTemplate) {
+        return new BaseSchemaManipulator(jdbcTemplate);
     }
 
     @Bean
