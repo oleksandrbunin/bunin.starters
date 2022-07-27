@@ -35,7 +35,7 @@ class MigrationServiceTest extends BaseTest {
     private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Autowired
-    ISchemaMigrationsService<DummyTenant> migrationServiceSchema;
+    ISchemaMigrationsService migrationServiceSchema;
 
     @Autowired
     ISchemaManipulator schemaManipulator;
@@ -67,11 +67,11 @@ class MigrationServiceTest extends BaseTest {
         DummyTenant dummyTenant1 = new DummyTenant(DUMMY_SCHEMA_NAME_1);
         DummyTenant dummyTenant2 = new DummyTenant(DUMMY_SCHEMA_NAME_2);
 
-        ISchemaMigrationsService<DummyTenant> dummyTenantISchemaMigrationsService = migrationServiceSchema;
+        ISchemaMigrationsService dummyTenantISchemaMigrationsService = migrationServiceSchema;
         for (DummyTenant dummyTenant : List.of(dummyTenant1, dummyTenant2)) {
-            dummyTenantISchemaMigrationsService.runMigrationsOnTenant(dummyTenant);
+            dummyTenantISchemaMigrationsService.runMigrationsOnSchema(dummyTenant.getSchema());
         }
-        dummyTenantISchemaMigrationsService.runMigrationsOnDefaultTenant();
+        dummyTenantISchemaMigrationsService.runMigrationsOnDefaultSchema();
 
         List.of(DUMMY_SCHEMA_NAME_1, DUMMY_SCHEMA_NAME_2, "public").forEach(schema -> assertThat(
                 jdbcTemplate.query("SELECT COUNT(t) FROM \"%s\".test t".formatted(schema),

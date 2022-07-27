@@ -4,7 +4,6 @@ import liquibase.exception.LiquibaseException;
 import liquibase.integration.spring.SpringLiquibase;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import org.ob.starters.commonwebstarter.Tenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
@@ -16,11 +15,12 @@ import javax.validation.constraints.NotNull;
 import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.nio.file.Path;
+import java.sql.SQLException;
 import java.util.List;
 
 import static org.ob.starters.tenancystarter.multitenancy.SpringLiquibaseBuilder.buildDefault;
 
-public abstract class BaseSchemaMigrationsService<T extends Tenant> implements ISchemaMigrationsService<T>, ResourceLoaderAware {
+public abstract class BaseSchemaMigrationsService implements ISchemaMigrationsService, ResourceLoaderAware {
 
     private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -45,38 +45,42 @@ public abstract class BaseSchemaMigrationsService<T extends Tenant> implements I
      * @throws IllegalArgumentException when default schema tenant does not exist
      */
     @Override
-    public void runMigrationsOnDefaultTenant()
-            throws LiquibaseException, IllegalArgumentException {
-        Tenant defaultTenant = getDefaultTenant();
-        List<URI> defaultSchemaMigrationsUris = migrationPathProvider.defaultMigrationsPaths();
-        runMigrations(defaultTenant, defaultProperties, defaultSchemaMigrationsUris);
+    public void runMigrationsOnDefaultSchema()
+            throws LiquibaseException, IllegalArgumentException, SQLException {
+        runMigrations(getDefaultSchema(), defaultProperties, migrationPathProvider.defaultMigrationsPaths());
+    }
+
+    @Override
+    public void runMigrationsOnSchema(String schema) throws Exception {
+        runMigrations(schema, defaultProperties, migrationPathProvider.tenantsMigrationsPaths());
     }
 
     /**
-     * @throws IllegalArgumentException when tenant schema does not exist
+     * @throws IllegalArgumentException when schema does not exist
      */
-    protected void runMigrations(@NotNull Tenant tenant,
+    protected void runMigrations(@NotNull String schema,
                                @NotNull LiquibaseProperties liquibaseProperties,
-                               @NotNull List<URI> migrationsUris) throws LiquibaseException, IllegalArgumentException {
+                               @NotNull List<URI> migrationsUris)
+            throws LiquibaseException, IllegalArgumentException, SQLException {
         logger.debug("CHECK THAT TENANT SCHEMA EXISTS");
-        if(!schemaManipulator.existsSchema(tenant.getSchema())) {
-            throw new IllegalArgumentException("Schema %s does not exist".formatted(tenant.getSchema()));
+        if(!schemaManipulator.existsSchema(schema)) {
+            throw new IllegalArgumentException("Schema %s does not exist".formatted(schema));
         }
-        logger.debug("RUNNING MIGRATIONS on {} tenant", tenant);
+        logger.debug("RUNNING MIGRATIONS on {} schema", schema);
         for (URI migrationUri: migrationsUris) {
             String migrationPath = relativizeToClasspathMigrationUri(migrationUri);
             ResourceAccessor resourceAccessor = createResourceAccessor(migrationUri);
-            logger.debug("STARTING MIGRATION {} on {} tenant", migrationPath, tenant);
+            logger.debug("STARTING MIGRATION {} on {} schema", migrationPath, schema);
             SpringLiquibase liquibase = buildDefault(
                     dataSource,
-                    tenant.getSchema(),
+                    schema,
                     migrationPath,
                     resourceLoader,
                     resourceAccessor,
                     liquibaseProperties
             );
             liquibase.afterPropertiesSet();
-            logger.debug("FINISHED MIGRATION {} on {} tenant", migrationPath, tenant);
+            logger.debug("FINISHED MIGRATION {} on {} schema", migrationPath, schema);
         }
     }
 
@@ -85,7 +89,7 @@ public abstract class BaseSchemaMigrationsService<T extends Tenant> implements I
         this.resourceLoader = resourceLoader;
     }
 
-    protected abstract Tenant getDefaultTenant();
+    protected abstract String getDefaultSchema();
 
 
     ///

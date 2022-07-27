@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
+import java.util.stream.Collectors;
 
 public class BaseSchemaManipulator implements ISchemaManipulator {
 
@@ -39,17 +40,17 @@ public class BaseSchemaManipulator implements ISchemaManipulator {
     }
 
     @Override
-    public void createSchema(String schema) {
+    public void createSchema(String schema) throws SQLException {
         createSchema(schema, true);
     }
 
     @Override
-    public void deleteSchema(String schema) {
+    public void deleteSchema(String schema) throws SQLException {
         deleteSchema(schema, true, true);
     }
 
     @Override
-    public void createSchema(String schema, boolean ifNotExists) {
+    public void createSchema(String schema, boolean ifNotExists) throws SQLException {
         if (ifNotExists) {
             jdbcTemplate.execute("CREATE SCHEMA IF NOT EXISTS \"%s\"".formatted(schema));
         } else {
@@ -58,7 +59,7 @@ public class BaseSchemaManipulator implements ISchemaManipulator {
     }
 
     @Override
-    public void deleteSchema(String schema, boolean cascade, boolean ifExists) {
+    public void deleteSchema(String schema, boolean cascade, boolean ifExists) throws SQLException {
         String sql = "DROP SCHEMA IF EXISTS \"%s\" CASCADE";
         if (!cascade) {
             sql = sql.replace("CASCADE", "");
@@ -97,10 +98,20 @@ public class BaseSchemaManipulator implements ISchemaManipulator {
      *  respectively (these are comparable to . and .* in POSIX regular expressions).
      *
      */
-    public Set<String> loadSchemas(@Nullable String regexPattern) {
+    public Set<String> loadSchemasSimilarTo(@Nullable String regexPattern) {
+        return loadAllSchemasSimilarTo(regexPattern).stream().filter(schema ->
+                !(
+                        "information_schema".equals(schema) || schema.contains("pg_")
+                )
+        ).collect(Collectors.toUnmodifiableSet());
+    }
+
+    protected Set<String> loadAllSchemasSimilarTo(@Nullable String regexPattern) {
         PreparedStatementCreator preparedStatementCreator = con -> {
             if (regexPattern != null) {
-                PreparedStatement preparedStatement = con.prepareStatement("SELECT nspname FROM pg_namespace WHERE nspname SIMILAR TO ?");
+                PreparedStatement preparedStatement = con.prepareStatement(
+                        "SELECT nspname FROM pg_namespace WHERE nspname SIMILAR TO ?"
+                );
                 preparedStatement.setString(1, regexPattern);
                 return preparedStatement;
             } else {
@@ -116,7 +127,7 @@ public class BaseSchemaManipulator implements ISchemaManipulator {
         });
     }
 
-    public static Lock makeSchemaLock(String schema, Connection connection) {
+    public static SchemaLock makeSchemaLock(String schema, Connection connection) {
         return new SchemaLock(connection, schema);
     }
 }

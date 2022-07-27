@@ -35,7 +35,7 @@ public class MigrationServiceTestConfiguration {
     }
 
     @Bean
-    public ISchemaMigrationsService<DummyTenant> migrationsService(IMigrationPathProvider migrationPathProvider,
+    public ISchemaMigrationsService migrationsService(IMigrationPathProvider migrationPathProvider,
                                                                    ISchemaManipulator schemaManipulator,
                                                                    DataSource dataSource,
                                                                    @Qualifier("defaultLiquibaseProperties")
