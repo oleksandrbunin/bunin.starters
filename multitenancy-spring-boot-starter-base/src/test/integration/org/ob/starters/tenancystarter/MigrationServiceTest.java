@@ -1,5 +1,6 @@
 package org.ob.starters.tenancystarter;
 
+import io.vavr.control.Try;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -32,8 +33,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Tag("integration")
 class MigrationServiceTest extends BaseTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
     @Autowired
     ISchemaMigrationsService migrationServiceSchema;
 
@@ -48,12 +47,12 @@ class MigrationServiceTest extends BaseTest {
     @BeforeEach
     void init() {
         jdbcTemplate.execute("DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres;");
-        List.of(DUMMY_SCHEMA_NAME_1, DUMMY_SCHEMA_NAME_2).forEach(schemaManipulator::createSchema);
+        List.of(DUMMY_SCHEMA_NAME_1, DUMMY_SCHEMA_NAME_2).forEach(schema -> Try.run(() -> schemaManipulator.createSchema(schema)));
     }
 
     @AfterEach
     void clean() {
-        List.of(DUMMY_SCHEMA_NAME_1, DUMMY_SCHEMA_NAME_2).forEach(schemaManipulator::deleteSchema);
+        List.of(DUMMY_SCHEMA_NAME_1, DUMMY_SCHEMA_NAME_2).forEach(schema -> Try.run(() -> schemaManipulator.deleteSchema(schema)));
         jdbcTemplate.execute("DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres;");
     }
 

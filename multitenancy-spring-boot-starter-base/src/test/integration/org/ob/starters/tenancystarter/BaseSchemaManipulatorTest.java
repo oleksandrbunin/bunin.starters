@@ -1,5 +1,6 @@
 package org.ob.starters.tenancystarter;
 
+import io.vavr.control.Try;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -37,18 +38,18 @@ class BaseSchemaManipulatorTest extends BaseTest {
 
     @BeforeEach
     void init() {
-        List.of(DUMMY_SCHEMA_NAME_1, DUMMY_SCHEMA_NAME_2).forEach(schemaManipulator::createSchema);
+        List.of(DUMMY_SCHEMA_NAME_1, DUMMY_SCHEMA_NAME_2).forEach(schema -> Try.run(() -> schemaManipulator.createSchema(schema)));
     }
 
     @AfterEach
     void clean() {
-        List.of(DUMMY_SCHEMA_NAME_1, DUMMY_SCHEMA_NAME_2).forEach(schemaManipulator::deleteSchema);
+        List.of(DUMMY_SCHEMA_NAME_1, DUMMY_SCHEMA_NAME_2).forEach(schema -> Try.run(() -> schemaManipulator.deleteSchema(schema)));
     }
 
     @Test
     void schemaMigrationsTest() {
-        assertThat(schemaManipulator.existsSchema(DUMMY_SCHEMA_NAME_1)).isTrue();
-        assertThat(schemaManipulator.existsSchema(DUMMY_SCHEMA_NAME_2)).isTrue();
+        assertThat(Try.of(() -> schemaManipulator.existsSchema(DUMMY_SCHEMA_NAME_1)).get()).isTrue();
+        assertThat(Try.of(() -> schemaManipulator.existsSchema(DUMMY_SCHEMA_NAME_2)).get()).isTrue();
     }
 
 
