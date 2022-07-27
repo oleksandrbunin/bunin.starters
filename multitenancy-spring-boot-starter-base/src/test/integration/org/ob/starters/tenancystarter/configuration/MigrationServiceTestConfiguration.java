@@ -1,10 +1,6 @@
 package org.ob.starters.tenancystarter.configuration;
 
-import org.ob.starters.tenancystarter.migrations.IMigrationPathProvider;
-import org.ob.starters.tenancystarter.migrations.ISchemaManipulator;
-import org.ob.starters.tenancystarter.migrations.ISchemaMigrationsService;
-import org.ob.starters.tenancystarter.migrations.MigrationPathsProvider;
-import org.ob.starters.tenancystarter.migrations.BaseSchemaManipulator;
+import org.ob.starters.tenancystarter.migrations.*;
 import org.ob.starters.tenancystarter.models.MigrationServiceSchema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,18 +22,24 @@ public class MigrationServiceTestConfiguration {
         return new MigrationPathsProvider(new PathMatchingResourcePatternResolver());
     }
 
-    @Bean
-    public ISchemaManipulator schemaManipulator(JdbcTemplate jdbcTemplate) {
+    @Bean("baseSchemaManipulator")
+    public static ISchemaManipulator baseSchemaManipulator(JdbcTemplate jdbcTemplate) {
         return new BaseSchemaManipulator(jdbcTemplate);
+    }
+
+    @Bean("cachingSchemaManipulator")
+    public static ISchemaManipulator cachingSchemaManipulator(JdbcTemplate jdbcTemplate, DataSource dataSource) {
+        return new CachingSchemaManipulator(jdbcTemplate, dataSource);
     }
 
     @Bean
     public ISchemaMigrationsService migrationsService(IMigrationPathProvider migrationPathProvider,
-                                                                   ISchemaManipulator schemaManipulator,
-                                                                   DataSource dataSource,
-                                                                   @Qualifier("defaultLiquibaseProperties")
+                                                      @Qualifier("baseSchemaManipulator")
+                                                              ISchemaManipulator schemaManipulator,
+                                                      DataSource dataSource,
+                                                      @Qualifier("defaultLiquibaseProperties")
                                                           @Autowired LiquibaseProperties defaultProperties,
-                                                                   @Qualifier("tenancyLiquibaseProperties")
+                                                      @Qualifier("tenancyLiquibaseProperties")
                                                           @Autowired LiquibaseProperties tenancyProperties) {
         return new MigrationServiceSchema(
                 defaultProperties,

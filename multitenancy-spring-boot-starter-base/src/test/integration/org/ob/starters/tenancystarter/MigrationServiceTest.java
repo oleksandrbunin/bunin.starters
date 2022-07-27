@@ -12,6 +12,7 @@ import org.ob.starters.tenancystarter.migrations.ISchemaManipulator;
 import org.ob.starters.tenancystarter.migrations.ISchemaMigrationsService;
 import org.ob.starters.tenancystarter.models.DummyTenant;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -35,6 +36,7 @@ class MigrationServiceTest extends BaseTest {
     ISchemaMigrationsService migrationServiceSchema;
 
     @Autowired
+    @Qualifier("cachingSchemaManipulator")
     ISchemaManipulator schemaManipulator;
 
     @Autowired
@@ -70,7 +72,7 @@ class MigrationServiceTest extends BaseTest {
         }
         dummyTenantISchemaMigrationsService.runMigrationsOnDefaultSchema();
 
-        List.of(DUMMY_SCHEMA_NAME_1, DUMMY_SCHEMA_NAME_2, "public").forEach(schema -> assertThat(
+        List.of(DUMMY_SCHEMA_NAME_1, DUMMY_SCHEMA_NAME_2).forEach(schema -> assertThat(
                 jdbcTemplate.query("SELECT COUNT(t) FROM \"%s\".test t".formatted(schema),
                         (ResultSetExtractor<Integer>) rs -> {
                             if (rs.next()) {
@@ -79,6 +81,18 @@ class MigrationServiceTest extends BaseTest {
                             return 0;
                         })
         ).isEqualTo(1));
+
+        List.of("public").forEach(schema -> assertThat(
+                jdbcTemplate.query("SELECT COUNT(t) FROM \"%s\".defaultTestTable t".formatted(schema),
+                        (ResultSetExtractor<Integer>) rs -> {
+                            if (rs.next()) {
+                                return rs.getInt(1);
+                            }
+                            return 0;
+                        })
+        ).isEqualTo(1));
+
+
 
     }
 

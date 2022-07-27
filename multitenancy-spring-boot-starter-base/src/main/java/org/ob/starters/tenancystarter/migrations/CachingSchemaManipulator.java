@@ -59,11 +59,14 @@ public class CachingSchemaManipulator extends BaseSchemaManipulator {
     public void createSchema(String schema, boolean ifNotExists) throws SQLException {
         if (cache.getIfPresent(schema) != null) return;
         try (Connection connection = dataSource.getConnection();
-             SchemaLock lock = BaseSchemaManipulator.makeSchemaLock(schema, connection)) {
+             AutoCloseableLock lock = BaseSchemaManipulator.makeSchemaLock(schema, connection)) {
             logger.info("Trying to acquire lock on {} schema for creation", schema);
             lock.lock();
             super.createSchema(schema, ifNotExists);
             cache.put(schema, o);
+        } catch (Exception exception) {
+            logger.error("Exception occurred", exception);
+            throw new RuntimeException(exception);
         }
     }
 
@@ -71,11 +74,14 @@ public class CachingSchemaManipulator extends BaseSchemaManipulator {
     public void deleteSchema(String schema, boolean cascade, boolean ifExists) throws SQLException {
         if (cache.getIfPresent(schema) == null) return;
         try (Connection connection = dataSource.getConnection();
-             SchemaLock lock = BaseSchemaManipulator.makeSchemaLock(schema, connection)) {
+             AutoCloseableLock lock = BaseSchemaManipulator.makeSchemaLock(schema, connection)) {
             logger.info("Trying to acquire lock on {} schema for deletion", schema);
             lock.lock();
             super.deleteSchema(schema, cascade, ifExists);
             cache.invalidate(schema);
+        } catch (Exception exception) {
+            logger.error("Exception occurred", exception);
+            throw new RuntimeException(exception);
         }
     }
 

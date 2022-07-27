@@ -21,7 +21,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
 public class BaseSchemaManipulator implements ISchemaManipulator {
@@ -46,15 +45,18 @@ public class BaseSchemaManipulator implements ISchemaManipulator {
 
     @Override
     public void createSchema(String schema, boolean ifNotExists) throws SQLException {
+        logger.info("Schema {} creation", schema);
         if (ifNotExists) {
             jdbcTemplate.execute("CREATE SCHEMA IF NOT EXISTS \"%s\"".formatted(schema));
         } else {
             jdbcTemplate.execute("CREATE SCHEMA \"%s\"".formatted(schema));
         }
+        logger.info("Schema {} created", schema);
     }
 
     @Override
     public void deleteSchema(String schema, boolean cascade, boolean ifExists) throws SQLException {
+        logger.info("Schema {} deletion", schema);
         String sql = "DROP SCHEMA IF EXISTS \"%s\" CASCADE";
         if (!cascade) {
             sql = sql.replace("CASCADE", "");
@@ -63,6 +65,7 @@ public class BaseSchemaManipulator implements ISchemaManipulator {
             sql = sql.replace("IF EXISTS", "");
         }
         jdbcTemplate.execute(sql.formatted(schema));
+        logger.info("Schema {} deleted", schema);
     }
 
     @Override
@@ -122,7 +125,7 @@ public class BaseSchemaManipulator implements ISchemaManipulator {
         });
     }
 
-    public static SchemaLock makeSchemaLock(String schema, Connection connection) {
+    public static AutoCloseableLock makeSchemaLock(String schema, Connection connection) {
         return new SchemaLock(connection, schema);
     }
 }
@@ -131,7 +134,7 @@ public class BaseSchemaManipulator implements ISchemaManipulator {
  * Schema lock implementation
  * Throws LockTimeoutException
  */
-class SchemaLock implements Lock, AutoCloseable  {
+class SchemaLock implements AutoCloseableLock  {
 
     private static final long defaultLockTimeout = 60;
     private static final TimeUnit defaultLockTimeUnit = TimeUnit.SECONDS;
@@ -146,13 +149,13 @@ class SchemaLock implements Lock, AutoCloseable  {
     private final String schema;
     private final int maxAttempts;
 
-    public SchemaLock(Connection connection, String schema, int maxAttempts) {
+    SchemaLock(Connection connection, String schema, int maxAttempts) {
         this.connection = connection;
         this.schema = schema;
         this.maxAttempts = maxAttempts;
     }
 
-    public SchemaLock(Connection connection, String schema) {
+    SchemaLock(Connection connection, String schema) {
         this.connection = connection;
         this.schema = schema;
         this.maxAttempts = 1;
@@ -202,13 +205,13 @@ class SchemaLock implements Lock, AutoCloseable  {
             try (Statement timeoutStatement = connection.createStatement()) {
                 String setLockTimeoutSql = "/* schema: " + schema + " */ " + LOCK_TIMEOUT_QUERY + schemaLockTimeoutMs + ";";
                 timeoutStatement.execute(setLockTimeoutSql);
-                logger.info("LOCK {} WAS SET", setLockTimeoutSql);
+                logger.info("LOCK WAS SET {}", setLockTimeoutSql);
             }
             String lockSchemaQuery = "/* schema: " + schema + " */ " + LOCK_SCHEMA_QUERY;
             try (PreparedStatement lockStatement = connection.prepareStatement(lockSchemaQuery)) {
                 lockStatement.setInt(1, calculateLockForSchema(schema));
                 lockStatement.execute();
-                logger.info("{} LOCK WAS ACQUIRED.", lockSchemaQuery);
+                logger.info("LOCK WAS ACQUIRED {}", lockSchemaQuery);
             }
             connection.commit();
             connection.setAutoCommit(previousAutoCommit);
@@ -238,6 +241,7 @@ class SchemaLock implements Lock, AutoCloseable  {
                     }
                 }
             }
+            logger.info("SCHEMA {} LOCK WAS RELEASED", schema);
         } catch (SQLException e) {
             logger.error("COULD NOT RELEASE LOCK FOR SCHEMA " + schema, e);
             throw new LockReleaseException("COULD NOT RELEASE LOCK FOR SCHEMA " + schema, e);
