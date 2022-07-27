@@ -4,6 +4,9 @@ on:
   pull_request:
     paths:
       - multitenancy-spring-boot-starter-base/**
+  push:
+    paths:
+      - multitenancy-spring-boot-starter-base/**
 
 jobs:
   test:
