@@ -1,6 +1,5 @@
 package org.ob.starters.tenancystarter.models;
 
-import org.ob.starters.commonwebstarter.Tenant;
 import org.ob.starters.tenancystarter.migrations.BaseSchemaMigrationsService;
 import org.ob.starters.tenancystarter.migrations.IMigrationPathProvider;
 import org.ob.starters.tenancystarter.migrations.ISchemaManipulator;
@@ -8,7 +7,7 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 
 import javax.sql.DataSource;
 
-public class MigrationServiceSchema extends BaseSchemaMigrationsService<DummyTenant> {
+public class MigrationServiceSchema extends BaseSchemaMigrationsService {
 
     protected final LiquibaseProperties tenantProperties;
 
@@ -22,12 +21,12 @@ public class MigrationServiceSchema extends BaseSchemaMigrationsService<DummyTen
     }
 
     @Override
-    protected Tenant getDefaultTenant() {
-        return new DummyTenant("public");
+    protected String getDefaultSchema() {
+        return "public";
     }
 
     @Override
-    public void runMigrationsOnTenant(DummyTenant tenant) throws Exception {
-        super.runMigrations(tenant, tenantProperties, migrationPathProvider.tenantsMigrationsPaths());
+    public void runMigrationsOnSchema(String schema) throws Exception {
+        super.runMigrations(schema, tenantProperties, migrationPathProvider.tenantsMigrationsPaths());
     }
 }
