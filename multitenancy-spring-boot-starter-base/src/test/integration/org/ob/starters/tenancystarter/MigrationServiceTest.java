@@ -5,8 +5,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.logging.Logger;
-import org.junit.platform.commons.logging.LoggerFactory;
 import org.ob.starters.tenancystarter.configuration.EmptyConfiguration;
 import org.ob.starters.tenancystarter.configuration.MigrationServiceTestConfiguration;
 import org.ob.starters.tenancystarter.configuration.SpringBootStarterTestConfiguration;

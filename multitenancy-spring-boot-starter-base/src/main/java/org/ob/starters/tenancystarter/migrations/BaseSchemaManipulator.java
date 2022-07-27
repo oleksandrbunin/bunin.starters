@@ -2,7 +2,6 @@ package org.ob.starters.tenancystarter.migrations;
 
 import org.hibernate.cfg.NotYetImplementedException;
 import org.ob.starters.tenancystarter.exceptions.LockReleaseException;
-import org.ob.starters.tenancystarter.multitenancy.StarterConfigurationProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;

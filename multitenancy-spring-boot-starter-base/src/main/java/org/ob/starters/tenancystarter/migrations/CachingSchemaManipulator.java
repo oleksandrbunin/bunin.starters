@@ -2,7 +2,6 @@ package org.ob.starters.tenancystarter.migrations;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import org.ob.starters.tenancystarter.multitenancy.StarterConfigurationProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,10 +23,9 @@ public class CachingSchemaManipulator extends BaseSchemaManipulator {
     private final Cache<String, Object> cache;
 
     protected CachingSchemaManipulator(JdbcTemplate jdbcTemplate,
-                                    StarterConfigurationProperties starterConfigurationProperties,
                                     DataSource dataSource,
                                     @Nullable String schemaLoadPattern) {
-        super(jdbcTemplate, starterConfigurationProperties);
+        super(jdbcTemplate);
         this.dataSource = dataSource;
         cache = CacheBuilder.newBuilder()
                 .expireAfterAccess(30, TimeUnit.MINUTES)
@@ -42,9 +40,8 @@ public class CachingSchemaManipulator extends BaseSchemaManipulator {
     }
 
     public CachingSchemaManipulator(JdbcTemplate jdbcTemplate,
-                                    StarterConfigurationProperties starterConfigurationProperties,
                                     DataSource dataSource) {
-        this(jdbcTemplate, starterConfigurationProperties, dataSource, "%");
+        this(jdbcTemplate, dataSource, "%");
     }
 
 
