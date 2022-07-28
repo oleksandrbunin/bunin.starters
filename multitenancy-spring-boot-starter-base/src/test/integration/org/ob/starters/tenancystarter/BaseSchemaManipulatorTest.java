@@ -1,7 +1,11 @@
 package org.ob.starters.tenancystarter;
 
 import io.vavr.control.Try;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.ob.starters.tenancystarter.configuration.EmptyConfiguration;
 import org.ob.starters.tenancystarter.configuration.MigrationServiceTestConfiguration;
@@ -30,6 +34,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+
 @SpringBootTest(classes = {
         EmptyConfiguration.class,
         TenancyStarterConfiguration.class,
@@ -42,6 +47,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BaseSchemaManipulatorTest extends BaseTest {
 
     private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
+    private static final Object o = new Object();
 
     @Autowired
     @Qualifier("cachingSchemaManipulator")
@@ -67,45 +74,65 @@ class BaseSchemaManipulatorTest extends BaseTest {
 
     @Test
     void schemaMigrationsTest() {
-        assertThat(Try.of(() -> schemaManipulator.existsSchema(DUMMY_SCHEMA_NAME_1)).get()).isTrue();
-        assertThat(Try.of(() -> schemaManipulator.existsSchema(DUMMY_SCHEMA_NAME_2)).get()).isTrue();
+        synchronized (o) {
+            assertThat(Try.of(() -> schemaManipulator.existsSchema(DUMMY_SCHEMA_NAME_1)).get()).isTrue();
+            assertThat(Try.of(() -> schemaManipulator.existsSchema(DUMMY_SCHEMA_NAME_2)).get()).isTrue();
+            assertThat(Try.of(() -> !schemaManipulator.existsSchema("NOT_EXISTED_SCHEMA")).get()).isTrue();
+        }
     }
 
     @Test
     void schemaManipulationLockTest() throws SQLException {
-        String sql = "SELECT locks.locktype as type, locks.objid as id FROM pg_catalog.pg_locks locks WHERE locks.locktype='advisory' AND locks.objid=%d".formatted(LockUtils.calculateLockId(MANIPULATION_TEST_LOCK_SCHEMA));
+        synchronized (o) {
+            String sql = "SELECT locks.locktype as type, locks.objid as id FROM pg_catalog.pg_locks locks WHERE locks.locktype='advisory' AND locks.objid=%d".formatted(LockUtils.calculateLockId(MANIPULATION_TEST_LOCK_SCHEMA));
 
-        schemaManipulator.createSchema(MANIPULATION_TEST_LOCK_SCHEMA);
-        assertThat(jdbcTemplate.query(sql, (ResultSetExtractor<Boolean>) rs -> !rs.next())).isTrue();
+            try {
+                schemaManipulator.createSchema(MANIPULATION_TEST_LOCK_SCHEMA);
+                assertThat(jdbcTemplate.query(sql, (ResultSetExtractor<Boolean>) rs -> !rs.next())).isTrue();
 
-        schemaManipulator.deleteSchema(MANIPULATION_TEST_LOCK_SCHEMA);
-        assertThat(jdbcTemplate.query(sql, (ResultSetExtractor<Boolean>) rs -> !rs.next())).isTrue();
+                schemaManipulator.deleteSchema(MANIPULATION_TEST_LOCK_SCHEMA);
+                assertThat(jdbcTemplate.query(sql, (ResultSetExtractor<Boolean>) rs -> !rs.next())).isTrue();
+            } finally {
+                schemaManipulator.deleteSchema(MANIPULATION_TEST_LOCK_SCHEMA);
+            }
+        }
     }
 
     @RepeatedTest(3)
     void schemaLockTest() {
-        DataSource dataSource = jdbcTemplate.getDataSource();
-        logger.info("Expected ID is {}", TEST_LOCK_SCHEMA.hashCode());
-        String sql = "SELECT locks.locktype as type, locks.objid as id FROM pg_catalog.pg_locks locks WHERE locks.locktype='advisory' AND locks.objid=%d".formatted(LockUtils.calculateLockId(TEST_LOCK_SCHEMA));
-        try (Connection connection = dataSource.getConnection();
-             AutoCloseableLock lock = BaseSchemaManipulator.makeSchemaLock(TEST_LOCK_SCHEMA, connection)) {
-            // --- check that lock has not been acquired yet ---
-            assertThat(jdbcTemplate.query(sql, (ResultSetExtractor<Boolean>) rs -> !rs.next())).isTrue();
+        synchronized (o) {
+            DataSource dataSource = jdbcTemplate.getDataSource();
+            logger.info("Expected ID is {}", LockUtils.calculateLockId(TEST_LOCK_SCHEMA));
+            String sql = "SELECT locks.locktype as type, locks.objid as id FROM pg_catalog.pg_locks locks WHERE locks.locktype='advisory' AND locks.objid=%d".formatted(LockUtils.calculateLockId(TEST_LOCK_SCHEMA));
+            try (Connection connection = dataSource.getConnection();
+                 AutoCloseableLock lock = BaseSchemaManipulator.makeSchemaLock(TEST_LOCK_SCHEMA, connection)) {
+                // --- check that lock has not been acquired yet ---
+                org.hamcrest.MatcherAssert.assertThat(
+                        "'check that lock has not been acquired yet' was failed",
+                        jdbcTemplate.query(sql, rs -> !rs.next()),
+                        org.hamcrest.Matchers.is(true)
+                );
 
-            logger.info("Trying acquire the Lock");
-            lock.lock();
-            // --- check that correct lock must be acquired ---
-            assertThat(
-                    jdbcTemplate.query(sql, new CustomResultSetExtractor(TEST_LOCK_SCHEMA))
-            ).isTrue();
+                logger.info("Trying acquire the Lock");
+                lock.lock();
+                // --- check that correct lock must be acquired ---
+                org.hamcrest.MatcherAssert.assertThat(
+                        "'check that correct lock must be acquired' was failed",
+                        jdbcTemplate.query(sql, new CustomResultSetExtractor(TEST_LOCK_SCHEMA)),
+                        org.hamcrest.Matchers.is(true)
+                );
 
-        } catch (Exception exception) {
-            throw new RuntimeException(exception);
+            } catch (Exception exception) {
+                throw new RuntimeException(exception);
+            }
+
+            // --- check that lock has been released ---
+            org.hamcrest.MatcherAssert.assertThat(
+                    "'check that lock has been released' was failed",
+                    jdbcTemplate.query(sql, rs -> !rs.next()),
+                    org.hamcrest.Matchers.is(true)
+            );
         }
-
-        // --- check that lock has been released ---
-        assertThat(jdbcTemplate.query(sql, (ResultSetExtractor<Boolean>) rs -> !rs.next())).isTrue();
-
     }
 
     static class CustomResultSetExtractor implements ResultSetExtractor<Boolean> {
@@ -124,8 +151,9 @@ class BaseSchemaManipulatorTest extends BaseTest {
             }
             logger.info("Checking the lock's ID");
             long id = rs.getLong("id");
-            logger.info("ID of the Lock is {}, expected ID = {}", id, schema.hashCode());
-            return id == LockUtils.calculateLockId(schema);
+            long expected = LockUtils.calculateLockId(schema);
+            logger.info("ID of the Lock is {}, expected ID = {}", id, expected);
+            return id == expected;
         }
     }
 
