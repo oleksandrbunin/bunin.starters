@@ -1,4 +1,4 @@
-name: Multitenancy Base Starter Deploy Workflow
+name: Multitenancy Base Starter Workflow
 
 on:
   pull_request:
