@@ -36,7 +36,7 @@ public class CachingSchemaManipulator extends BaseSchemaManipulator {
         if (schemaLoadPattern == null) {
             schemaLoadPattern = "%";
         }
-        super.loadAllSchemasSimilarTo(schemaLoadPattern).forEach(schema -> cache.put(schema, o));
+        super.loadSchemasSimilarTo(schemaLoadPattern).forEach(schema -> cache.put(schema, o));
     }
 
     public CachingSchemaManipulator(JdbcTemplate jdbcTemplate,
@@ -56,7 +56,7 @@ public class CachingSchemaManipulator extends BaseSchemaManipulator {
     }
 
     @Override
-    public void createSchema(String schema, boolean ifNotExists) throws SQLException {
+    public void createSchema(String schema, boolean ifNotExists) {
         if (cache.getIfPresent(schema) != null) return;
         try (Connection connection = dataSource.getConnection();
              AutoCloseableLock lock = BaseSchemaManipulator.makeSchemaLock(schema, connection)) {
@@ -71,7 +71,7 @@ public class CachingSchemaManipulator extends BaseSchemaManipulator {
     }
 
     @Override
-    public void deleteSchema(String schema, boolean cascade, boolean ifExists) throws SQLException {
+    public void deleteSchema(String schema, boolean cascade, boolean ifExists) {
         if (cache.getIfPresent(schema) == null) return;
         try (Connection connection = dataSource.getConnection();
              AutoCloseableLock lock = BaseSchemaManipulator.makeSchemaLock(schema, connection)) {
@@ -98,8 +98,8 @@ public class CachingSchemaManipulator extends BaseSchemaManipulator {
     }
 
     @Override
-    protected Set<String> loadAllSchemasSimilarTo(@Nullable String regexPattern) {
-        Set<String> schemas = super.loadAllSchemasSimilarTo(regexPattern);
+    public Set<String> loadSchemasSimilarTo(@Nullable String regexPattern) {
+        Set<String> schemas = super.loadSchemasSimilarTo(regexPattern);
         schemas.forEach(schema -> cache.put(schema, o));
         return schemas;
     }

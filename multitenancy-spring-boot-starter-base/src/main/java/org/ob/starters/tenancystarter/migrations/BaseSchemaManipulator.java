@@ -2,15 +2,19 @@ package org.ob.starters.tenancystarter.migrations;
 
 import org.hibernate.cfg.NotYetImplementedException;
 import org.ob.starters.tenancystarter.exceptions.LockReleaseException;
+import org.ob.starters.tenancystarter.migrations.utils.LockUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
 
 import javax.annotation.Nullable;
 import javax.persistence.LockTimeoutException;
+import javax.validation.constraints.NotNull;
 import java.lang.invoke.MethodHandles;
 
+import java.lang.ref.WeakReference;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -28,9 +32,11 @@ public class BaseSchemaManipulator implements ISchemaManipulator {
     private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final JdbcTemplate jdbcTemplate;
+    private final SchemaManipulatorSupplier schemaManipulatorSupplier;
 
     public BaseSchemaManipulator(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        schemaManipulatorSupplier = new SchemaManipulatorSupplier();
     }
 
     @Override
@@ -46,38 +52,55 @@ public class BaseSchemaManipulator implements ISchemaManipulator {
     @Override
     public void createSchema(String schema, boolean ifNotExists) throws SQLException {
         logger.info("Schema {} creation", schema);
-        if (ifNotExists) {
-            jdbcTemplate.execute("CREATE SCHEMA IF NOT EXISTS \"%s\"".formatted(schema));
-        } else {
-            jdbcTemplate.execute("CREATE SCHEMA \"%s\"".formatted(schema));
-        }
+        jdbcTemplate.execute(schemaManipulatorSupplier.createSchema(schema, ifNotExists));
         logger.info("Schema {} created", schema);
     }
 
     @Override
     public void deleteSchema(String schema, boolean cascade, boolean ifExists) throws SQLException {
         logger.info("Schema {} deletion", schema);
-        String sql = "DROP SCHEMA IF EXISTS \"%s\" CASCADE";
-        if (!cascade) {
-            sql = sql.replace("CASCADE", "");
-        }
-        if (!ifExists) {
-            sql = sql.replace("IF EXISTS", "");
-        }
-        jdbcTemplate.execute(sql.formatted(schema));
+        jdbcTemplate.execute(schemaManipulatorSupplier.deleteSchema(schema, cascade, ifExists));
         logger.info("Schema {} deleted", schema);
     }
 
     @Override
     public boolean existsSchema(String schema) {
         // can be null
-        return "public".equals(schema) ||
-                Objects.equals(
-                        jdbcTemplate.queryForObject(
-                                "SELECT EXISTS(SELECT 1 FROM pg_namespace WHERE nspname = '%s')".formatted(schema),
-                                Boolean.class
-                        ), Boolean.TRUE
-                );
+        return "public".equals(schema)
+                ||
+                Objects.equals(jdbcTemplate.execute(schemaManipulatorSupplier.existsSchema(schema)), Boolean.TRUE);
+    }
+
+    @Override
+    public void createSchema(String schema, Connection connection) throws SQLException {
+        createSchema(schema, true, connection);
+    }
+
+    @Override
+    public void deleteSchema(String schema, Connection connection) throws SQLException {
+        deleteSchema(schema, true, true, connection);
+    }
+
+    @Override
+    public void createSchema(String schema, boolean ifNotExists, Connection connection) throws SQLException {
+        logger.info("Schema {} creation", schema);
+        schemaManipulatorSupplier.createSchema(schema, ifNotExists).doInConnection(connection);
+        logger.info("Schema {} created", schema);
+    }
+
+    @Override
+    public void deleteSchema(String schema, boolean cascade, boolean ifExists, Connection connection)
+            throws SQLException {
+        logger.info("Schema {} deletion", schema);
+        schemaManipulatorSupplier.deleteSchema(schema, cascade, ifExists).doInConnection(connection);
+        logger.info("Schema {} deleted", schema);
+    }
+
+    @Override
+    public boolean existsSchema(String schema, Connection connection) throws SQLException {
+        return Objects.requireNonNull(
+                schemaManipulatorSupplier.existsSchema(schema).doInConnection(connection),
+                "Exists schema query response returned null");
     }
 
     // --- EXTRA USEFUL METHODS ---
@@ -96,37 +119,95 @@ public class BaseSchemaManipulator implements ISchemaManipulator {
      *  respectively (these are comparable to . and .* in POSIX regular expressions).
      *
      */
-    public Set<String> loadSchemasSimilarTo(@Nullable String regexPattern) {
-        return loadAllSchemasSimilarTo(regexPattern).stream().filter(schema ->
-                !(
-                        "information_schema".equals(schema) || schema.contains("pg_")
-                )
-        ).collect(Collectors.toUnmodifiableSet());
+    public Set<String> loadSchemasSimilarTo(@Nullable String regexPattern, Connection connection) throws SQLException {
+        return Objects.requireNonNull(
+                schemaManipulatorSupplier.loadSchemasSimilarTo(regexPattern).doInConnection(connection))
+                .stream()
+                .filter(schema -> !("information_schema".equals(schema) || schema.contains("pg_")))
+                .collect(Collectors.toUnmodifiableSet());
     }
 
-    protected Set<String> loadAllSchemasSimilarTo(@Nullable String regexPattern) {
-        PreparedStatementCreator preparedStatementCreator = con -> {
-            if (regexPattern != null) {
-                PreparedStatement preparedStatement = con.prepareStatement(
-                        "SELECT nspname FROM pg_namespace WHERE nspname SIMILAR TO ?"
-                );
-                preparedStatement.setString(1, regexPattern);
-                return preparedStatement;
-            } else {
-                return con.prepareStatement("SELECT nspname FROM pg_namespace");
-            }
-        };
-        return jdbcTemplate.query(preparedStatementCreator, rs -> {
-            Set<String> results = new HashSet<>();
-            while (rs.next()) {
-                results.add(rs.getString("nspname"));
-            }
-            return results;
-        });
+    public Set<String> loadSchemasSimilarTo(@Nullable String regexPattern) throws DataAccessException {
+        return Objects.requireNonNull(
+                jdbcTemplate.execute(schemaManipulatorSupplier.loadSchemasSimilarTo(regexPattern)))
+                .stream()
+                .filter(schema -> !("information_schema".equals(schema) || schema.contains("pg_")))
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     public static AutoCloseableLock makeSchemaLock(String schema, Connection connection) {
         return new SchemaLock(connection, schema);
+    }
+}
+
+class SchemaManipulatorSupplier implements ISchemaManipulatorSupplier {
+
+    @Override
+    @NotNull
+    public ConnectionCallback<Void> createSchema(String schema, boolean ifNotExists) {
+        final String sql;
+        if (ifNotExists) {
+            sql = "CREATE SCHEMA IF NOT EXISTS \"%s\"".formatted(schema);
+        } else {
+            sql = "CREATE SCHEMA \"%s\"".formatted(schema);
+        }
+        return con -> {
+            con.prepareStatement(sql).execute();
+            return null;
+        };
+    }
+
+    @Override
+    @NotNull
+    public ConnectionCallback<Void> deleteSchema(String schema, boolean cascade, boolean ifExists) {
+        String prepareSqlQuery = "DROP SCHEMA IF EXISTS \"%s\" CASCADE";
+        if (!cascade) {
+            prepareSqlQuery = prepareSqlQuery.replace("CASCADE", "");
+        }
+        if (!ifExists) {
+            prepareSqlQuery = prepareSqlQuery.replace("IF EXISTS", "");
+        }
+        prepareSqlQuery = prepareSqlQuery.formatted(schema);
+        final String sql = prepareSqlQuery;
+        return con -> {
+            con.prepareStatement(sql).execute();
+            return null;
+        };
+    }
+
+    @Override
+    @NotNull
+    public ConnectionCallback<Boolean> existsSchema(String schema) {
+        String sql = "SELECT EXISTS(SELECT 1 FROM pg_namespace WHERE nspname = '%s')".formatted(schema);
+        return con -> {
+            ResultSet resultSet = con.prepareStatement(sql).executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getBoolean(1);
+            } else {
+                throw new SQLException("ResultSet does not contain results");
+            }
+        };
+    }
+
+    public ConnectionCallback<Set<String>> loadSchemasSimilarTo(@Nullable String regexPattern) {
+        return con -> {
+            final PreparedStatement preparedStatement;
+            if (regexPattern != null) {
+                preparedStatement = con.prepareStatement(
+                        "SELECT nspname FROM pg_namespace WHERE nspname SIMILAR TO ?"
+                );
+                preparedStatement.setString(1, regexPattern);
+            } else {
+                preparedStatement = con.prepareStatement("SELECT nspname FROM pg_namespace");
+            }
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            Set<String> results = new HashSet<>();
+            while (resultSet.next()) {
+                results.add(resultSet.getString("nspname"));
+            }
+            return results;
+        };
     }
 }
 
@@ -145,18 +226,18 @@ class SchemaLock implements AutoCloseableLock  {
     private static final String LOCK_SCHEMA_QUERY = "SELECT pg_advisory_lock(?);";
     private static final String UNLOCK_SCHEMA_QUERY = "SELECT pg_advisory_unlock(?);";
 
-    private final Connection connection;
+    private final WeakReference<Connection> connectionWeakReference;
     private final String schema;
     private final int maxAttempts;
 
     SchemaLock(Connection connection, String schema, int maxAttempts) {
-        this.connection = connection;
+        this.connectionWeakReference = new WeakReference<>(connection);
         this.schema = schema;
         this.maxAttempts = maxAttempts;
     }
 
     SchemaLock(Connection connection, String schema) {
-        this.connection = connection;
+        this.connectionWeakReference = new WeakReference<>(connection);
         this.schema = schema;
         this.maxAttempts = 1;
     }
@@ -194,6 +275,9 @@ class SchemaLock implements AutoCloseableLock  {
     @Override
     public boolean tryLock(long time, TimeUnit unit) {
         long schemaLockTimeoutMs = unit.toMillis(time);
+        Connection connection = Objects.requireNonNull(
+                this.connectionWeakReference.get(), "Connection was removed by GC"
+        );
         try {
             boolean previousAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
@@ -203,7 +287,8 @@ class SchemaLock implements AutoCloseableLock  {
                     schemaLockTimeoutMs
             );
             try (Statement timeoutStatement = connection.createStatement()) {
-                String setLockTimeoutSql = "/* schema: " + schema + " */ " + LOCK_TIMEOUT_QUERY + schemaLockTimeoutMs + ";";
+                String setLockTimeoutSql = "/* schema: " + schema + " */ " +
+                        LOCK_TIMEOUT_QUERY + schemaLockTimeoutMs + ";";
                 timeoutStatement.execute(setLockTimeoutSql);
                 logger.info("LOCK WAS SET {}", setLockTimeoutSql);
             }
@@ -228,6 +313,9 @@ class SchemaLock implements AutoCloseableLock  {
 
     @Override
     public void unlock() {
+        Connection connection = Objects.requireNonNull(
+                this.connectionWeakReference.get(), "Connection was removed by GC"
+        );
         try {
             logger.info("TRYING TO RELEASE {} SCHEMA LOCK", schema);
             String unlockTenantQuery = "/* schema: " + schema + " */ " + UNLOCK_SCHEMA_QUERY;

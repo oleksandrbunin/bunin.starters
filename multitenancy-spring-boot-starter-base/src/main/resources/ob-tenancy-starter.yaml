@@ -2,6 +2,3 @@ ob-tenancy-starter:
   enabled: true
   multitenancy: SCHEMA_PER_TENANT
   defaultSchema: public
-  schemaLockTimeout:
-    timeUnit: SECONDS
-    timeout: 90
