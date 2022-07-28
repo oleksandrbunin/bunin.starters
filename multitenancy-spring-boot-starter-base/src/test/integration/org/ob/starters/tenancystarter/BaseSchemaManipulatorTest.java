@@ -9,7 +9,7 @@ import org.ob.starters.tenancystarter.configuration.SpringBootStarterTestConfigu
 import org.ob.starters.tenancystarter.migrations.AutoCloseableLock;
 import org.ob.starters.tenancystarter.migrations.BaseSchemaManipulator;
 import org.ob.starters.tenancystarter.migrations.ISchemaManipulator;
-import org.ob.starters.tenancystarter.migrations.LockUtils;
+import org.ob.starters.tenancystarter.migrations.utils.LockUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
