@@ -12,9 +12,9 @@ public interface ITenantOperations<T extends Tenant> {
 
     Iterable<T> findAll();
 
-    T save(T tenant);
+    T save(T tenant) throws Exception;
 
-    T update(T tenant);
+    T update(T tenant) throws Exception;
 
     void deleteById(String id);
 
